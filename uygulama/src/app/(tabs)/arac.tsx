@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Backdrop } from '@/components/Backdrop';
 import { Icon } from '@/components/Icon';
 import { useTabBarSpace } from '@/components/TabBar';
+import { TopBlur, useScrollY } from '@/components/TopBlur';
 import { MaintenanceSheet, OdoSheet } from '@/components/MaintenanceSheet';
 import { VehicleSheet } from '@/components/VehicleSheet';
 import { fmt, stampLabel, tl } from '@/lib/format';
@@ -18,6 +19,8 @@ import { fonts, solid, type Palette } from '@/theme/tokens';
 export default function Arac() {
   const { c } = useTheme();
   const tabSpace = useTabBarSpace();
+  const insets = useSafeAreaInsets();
+  const { y, onScroll } = useScrollY();
   const s = styles(c);
   const { vehicle } = useVehicle();
   const { current, past } = useShift();
@@ -73,10 +76,13 @@ export default function Arac() {
   const meta = [vehicle.model ? `${vehicle.year ? vehicle.year + ' ' : ''}${vehicle.model}` : '', vehicle.fuel].filter(Boolean).join(' · ');
 
   return (
-    <SafeAreaView style={s.screen} edges={['top']}>
+    <View style={s.screen}>
       <Backdrop />
       {sheets}
-      <ScrollView contentContainerStyle={[s.body, { paddingBottom: tabSpace }]} showsVerticalScrollIndicator={false}>
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={[s.body, { paddingTop: insets.top, paddingBottom: tabSpace }]} showsVerticalScrollIndicator={false}>
         <Text style={[s.title, { paddingHorizontal: 0 }]}>Araç ve bakım</Text>
 
         {/* Kimlik satırı: plaka küçük ve harf yazı tipiyle; büyük rakam sadece gösterge km'si. */}
@@ -134,7 +140,14 @@ export default function Arac() {
                 <Icon name={it.icon} size={21} color={tone[it.urgency]} />
               </View>
               <Text style={s.mtName}>{it.name}</Text>
-              <Text style={[s.mtText, { color: it.urgency === 'eksik' ? c.yellowInk : tone[it.urgency] }]}>{it.text}</Text>
+              {it.urgency === 'eksik' ? (
+                <View style={s.fill}>
+                  <Text style={[s.mtText, s.fillText]}>{it.text}</Text>
+                  <Icon name="right" size={16} color={c.muted} />
+                </View>
+              ) : (
+                <Text style={[s.mtText, { color: tone[it.urgency] }]}>{it.text}</Text>
+              )}
             </Pressable>
           ))}
         </View>
@@ -155,8 +168,9 @@ export default function Arac() {
           </View>
           <Text style={s.hint}>Km, vardiya sonunda girdiğin değerlerden; yakıt, "Yakıt" giderlerinden hesaplanır.</Text>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      </Animated.ScrollView>
+      <TopBlur y={y} />
+    </View>
   );
 }
 
@@ -182,6 +196,9 @@ const styles = (c: Palette) =>
     iconBox: { width: 28, alignItems: 'center' },
     mtName: { flex: 1, ...fonts.uiBold, fontSize: 17, color: c.text },
     mtText: { ...fonts.numHeavy, fontSize: 16 },
+    // Eksik bilgi: soluk "Bilgi gir ›", dokunulabilir olduğu belli; hardal renk kalabalığı yok.
+    fill: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+    fillText: { ...fonts.uiSemi, color: c.muted },
     third: { flex: 1, gap: 6 },
     vline: { paddingLeft: 12 },
     miniLabel: { ...fonts.uiSemi, fontSize: 14, color: c.muted },

@@ -1,11 +1,12 @@
 import * as Haptics from 'expo-haptics';
 import { useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Backdrop } from '@/components/Backdrop';
 import { Icon } from '@/components/Icon';
 import { useTabBarSpace } from '@/components/TabBar';
+import { TopBlur, useScrollY } from '@/components/TopBlur';
 import { DEMAND_LABEL, SUPPORTED_CITIES, sampleEvents, type CityEvent, type Demand } from '@/lib/events';
 import { MONTHS, addDays, dayDiff, monday, startOfDay } from '@/lib/period';
 import { useProfile } from '@/store/profile';
@@ -22,6 +23,8 @@ const TABS: [Tab, string][] = [
 export default function Etkinlik() {
   const { c } = useTheme();
   const tabSpace = useTabBarSpace();
+  const insets = useSafeAreaInsets();
+  const { y, onScroll } = useScrollY();
   const s = styles(c);
   const { profile, settings, setSetting } = useProfile();
   const [tab, setTab] = useState<Tab>('bugun');
@@ -54,9 +57,12 @@ export default function Etkinlik() {
   const supported = SUPPORTED_CITIES.includes(il);
 
   return (
-    <SafeAreaView style={s.screen} edges={['top']}>
+    <View style={s.screen}>
       <Backdrop />
-      <ScrollView contentContainerStyle={[s.body, { paddingBottom: tabSpace }]} showsVerticalScrollIndicator={false}>
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={[s.body, { paddingTop: insets.top, paddingBottom: tabSpace }]} showsVerticalScrollIndicator={false}>
         <Text style={s.title}>Etkinlikler</Text>
         <View style={s.pill}>
           <Icon name="pin" size={14} color={c.yellowInk} />
@@ -100,8 +106,9 @@ export default function Etkinlik() {
             <Text style={s.sample}>Deneme sürümü: gösterilen etkinlikler örnektir.</Text>
           </>
         )}
-      </ScrollView>
-    </SafeAreaView>
+      </Animated.ScrollView>
+      <TopBlur y={y} />
+    </View>
   );
 }
 
@@ -131,12 +138,12 @@ function EventRow({ e, days, bell, onBell, last }: { e: CityEvent; days: number;
         </View>
         <Pressable
           onPress={onBell}
-          style={[s.bell, bell ? { borderColor: c.yellow, backgroundColor: c.yellowSoft } : { borderColor: c.line }]}
+          style={({ pressed }) => [s.bell, { backgroundColor: bell ? c.yellow : c.sunk }, pressed && { transform: [{ scale: 0.92 }] }]}
           accessibilityRole="switch"
           accessibilityState={{ checked: bell }}
           accessibilityLabel={bell ? 'Hatırlatmayı kapat' : 'Hatırlat'}
         >
-          <Icon name={bell ? 'bell' : 'belloff'} size={20} color={bell ? c.yellowInk : c.faint} />
+          <Icon name={bell ? 'bell' : 'belloff'} size={20} color={bell ? solid.onYellow : c.muted} />
         </Pressable>
       </View>
       <View style={s.between}>
@@ -182,15 +189,16 @@ const styles = (c: Palette) =>
     },
     pillText: { ...fonts.uiBold, fontSize: 13, color: c.yellowInk },
     lead: { ...fonts.ui, fontSize: 15.5, color: c.muted, lineHeight: 22, marginTop: 10 },
-    seg: { flexDirection: 'row', marginTop: 16, marginBottom: 4, padding: 4, borderRadius: 14, backgroundColor: c.sunk, borderWidth: 1, borderColor: c.line },
-    segBtn: { flex: 1, height: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+    seg: { flexDirection: 'row', marginTop: 16, marginBottom: 4, padding: 4, borderRadius: 16, backgroundColor: c.card, borderWidth: 1, borderColor: c.cardBorder },
+    segBtn: { flex: 1, height: 44, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
     segText: { ...fonts.uiSemi, fontSize: 15 },
     empty: { ...fonts.ui, fontSize: 16, color: c.faint, textAlign: 'center', paddingVertical: 48, lineHeight: 24 },
     ev: { gap: 12, backgroundColor: c.card, borderWidth: 1, borderColor: c.cardBorder, borderRadius: 20, padding: 18, marginTop: 14 },
     evTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
     cat: { ...fonts.uiBold, fontSize: 12, color: c.muted },
     evTitle: { ...fonts.uiSemi, fontSize: 19, color: c.text, marginTop: 4, lineHeight: 25 },
-    bell: { width: 46, height: 46, borderRadius: 13, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+    // Yuvarlak zil: açıkken dolu taksi sarısı, kapalıyken sade.
+    bell: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
     between: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
     badge: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 9 },
     badgeText: { ...fonts.uiBold, fontSize: 12 },

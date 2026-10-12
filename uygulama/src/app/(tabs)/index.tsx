@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Backdrop } from '@/components/Backdrop';
 import { EditEntrySheet } from '@/components/EditEntrySheet';
@@ -9,6 +9,7 @@ import { EndShiftSheet } from '@/components/EndShiftSheet';
 import { EntryRow } from '@/components/EntryRow';
 import { Icon } from '@/components/Icon';
 import { useTabBarSpace } from '@/components/TabBar';
+import { TOP_BAR, TopBlur, useScrollY } from '@/components/TopBlur';
 import { SETTINGS_BTN } from '@/components/SettingsButton';
 import { CATEGORY } from '@/lib/categories';
 import { dur, tl } from '@/lib/format';
@@ -32,6 +33,8 @@ function useNow(everyMs: number) {
 export default function Home() {
   const { c } = useTheme();
   const tabSpace = useTabBarSpace();
+  const insets = useSafeAreaInsets();
+  const { y, onScroll } = useScrollY();
   const s = styles(c);
   const { current, startShift } = useShift();
   const { settings } = useProfile();
@@ -85,29 +88,18 @@ export default function Home() {
 
   const recent = [...current.entries].sort((a, b) => b.at - a.at).slice(0, RECENT_COUNT);
 
+  // Başlık satırı (Vardiya · Bitir) sabit; içerik ekranın en üstüne kadar kayar ve kaydırınca
+  // üstte buzlu cam şerit belirir (TopBlur), başlık onun üstünde durur.
   return (
-    <SafeAreaView style={s.screen} edges={['top']}>
+    <View style={s.screen}>
       <Backdrop />
       {sheets}
-      <View style={s.header}>
-        <View style={s.pill}>
-          <View style={[s.dot, { backgroundColor: c.green }]} />
-          <Text style={[s.pillText, { color: c.green }]}>Vardiya · {dur(now - current.start)}</Text>
-        </View>
-        <View style={s.headerRight}>
-          <Pressable
-            style={({ pressed }) => [s.stopBtn, pressed && { opacity: 0.6 }]}
-            onPress={() => setEnding(true)}
-            accessibilityRole="button"
-            accessibilityLabel="Vardiyayı bitir"
-          >
-            <Text style={s.stopText}>Bitir</Text>
-          </Pressable>
-          {settingsBtn}
-        </View>
-      </View>
-
-      <ScrollView contentContainerStyle={[s.body, { paddingBottom: tabSpace }]} showsVerticalScrollIndicator={false}>
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={[s.body, { paddingTop: insets.top + TOP_BAR - 14, paddingBottom: tabSpace }]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Deneme tasarımı: çizgiler yerine üç kutu (ciro + net + gider / gelir dağılımı / son işlemler). */}
         <View style={s.card}>
           <View style={s.between}>
@@ -174,14 +166,33 @@ export default function Home() {
             ))
           )}
         </View>
-      </ScrollView>
-    </SafeAreaView>
+      </Animated.ScrollView>
+      <TopBlur y={y} />
+      <View style={[s.header, s.headerFloat, { top: insets.top }]}>
+        <View style={s.pill}>
+          <View style={[s.dot, { backgroundColor: c.green }]} />
+          <Text style={[s.pillText, { color: c.green }]}>Vardiya · {dur(now - current.start)}</Text>
+        </View>
+        <View style={s.headerRight}>
+          <Pressable
+            style={({ pressed }) => [s.stopBtn, pressed && { opacity: 0.6 }]}
+            onPress={() => setEnding(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Vardiyayı bitir"
+          >
+            <Text style={s.stopText}>Bitir</Text>
+          </Pressable>
+          {settingsBtn}
+        </View>
+      </View>
+    </View>
   );
 }
 
 const styles = (c: Palette) =>
   StyleSheet.create({
     screen: { flex: 1, backgroundColor: 'transparent' },
+    headerFloat: { position: 'absolute', left: 0, right: 0 },
     header: {
       flexDirection: 'row',
       justifyContent: 'space-between',

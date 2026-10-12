@@ -85,6 +85,14 @@ export default function Ayarlar() {
         </View>
 
         <View style={s.section}>
+          <Text style={s.label}>Ses</Text>
+          <Row icon="sound" tone={c.green} bg={c.greenSoft} title="Kayıt sesi" sub="Gelirde çın-çın, giderde kısa bir tık">
+            <Toggle value={on('saveSound')} onChange={(v) => setSetting('saveSound', v ? '1' : '0')} label="Kayıt sesi" />
+          </Row>
+          <Text style={s.hint}>Telefon sessiz moddayken ses çalmaz.</Text>
+        </View>
+
+        <View style={s.section}>
           <Text style={s.label}>Bildirimler</Text>
           <Row icon="bell" tone={c.blue} bg={c.blueSoft} title="Açık kalan vardiya" sub="Vardiya 14 saati geçince uyar">
             <Toggle value={on('notifShift')} onChange={(v) => setSetting('notifShift', v ? '1' : '0')} label="Açık kalan vardiya" />
@@ -245,7 +253,7 @@ const styles = (c: Palette) =>
     section: { backgroundColor: c.card, borderWidth: 1, borderColor: c.cardBorder, borderRadius: 20, paddingHorizontal: 18, paddingVertical: 16, marginTop: 14 },
     label: { ...fonts.uiBold, fontSize: 16, color: c.text, marginBottom: 4 },
     hint: { ...fonts.ui, fontSize: 14, color: c.faint, marginTop: 10 },
-    seg: { flexDirection: 'row', marginTop: 10, padding: 4, borderRadius: 14, backgroundColor: c.sunk, borderWidth: 1, borderColor: c.line },
+    seg: { flexDirection: 'row', marginTop: 10, padding: 4, borderRadius: 14, backgroundColor: c.sunk },
     segBtn: { flex: 1, height: 44, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
     segText: { ...fonts.uiSemi, fontSize: 15 },
     row: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12 },

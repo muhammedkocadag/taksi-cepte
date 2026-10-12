@@ -8,6 +8,8 @@ import { Backdrop } from '@/components/Backdrop';
 import { Icon } from '@/components/Icon';
 import { CATEGORY } from '@/lib/categories';
 import { fmt, tl } from '@/lib/format';
+import { useSaveSound } from '@/lib/sounds';
+import { useProfile } from '@/store/profile';
 import { EXPENSE, INCOME, isIncome, totals, useShift, type Category, type Entry } from '@/store/shift';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, solid, type Palette } from '@/theme/tokens';
@@ -22,6 +24,8 @@ export default function QuickEntry() {
   const { c } = useTheme();
   const s = styles(c);
   const { current, addEntry } = useShift();
+  const { settings } = useProfile();
+  const playSound = useSaveSound(settings.saveSound !== '0'); // varsayılan açık
   const [amount, setAmount] = useState('0');
   const [saved, setSaved] = useState(0);
   const [flash, setFlash] = useState<Entry | null>(null);
@@ -56,6 +60,7 @@ export default function QuickEntry() {
     const e = addEntry(category, parseInt(amount, 10));
     if (!e) return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    playSound(isIncome(category));
     savesThisSession++;
     setAmount('0');
     setSaved((n) => n + 1);
@@ -150,14 +155,16 @@ export default function QuickEntry() {
                 onPress={() => save(cat)}
                 style={({ pressed }) => [
                   s.saveBtn,
-                  { backgroundColor: g.fill, opacity: zero ? 0.32 : 1 },
+                  // Tutar 0'ken nötr cam düğme (renk sadece ikon/yazıda); tutar girilince dolgun renk.
+                  zero ? s.saveIdle : { backgroundColor: g.fill },
                   pressed && { transform: [{ scale: 0.96 }] },
                 ]}
                 accessibilityRole="button"
+                accessibilityState={{ disabled: zero }}
                 accessibilityLabel={`${CATEGORY[cat].label} olarak kaydet`}
               >
-                <Icon name={CATEGORY[cat].icon} size={23} color={solid.onSolid} />
-                <Text style={s.saveText}>{CATEGORY[cat].short}</Text>
+                <Icon name={CATEGORY[cat].icon} size={23} color={zero ? g.color : solid.onSolid} />
+                <Text style={[s.saveText, zero && { color: g.color }]}>{CATEGORY[cat].short}</Text>
               </Pressable>
             ))}
           </View>
@@ -217,4 +224,5 @@ const styles = (c: Palette) =>
     btnRow: { flexDirection: 'row', gap: 8 },
     saveBtn: { flex: 1, height: 70, borderRadius: 16, alignItems: 'center', justifyContent: 'center', gap: 3 },
     saveText: { ...fonts.uiBold, fontSize: 16, color: solid.onSolid },
+    saveIdle: { backgroundColor: c.card, borderWidth: 1, borderColor: c.cardBorder },
   });

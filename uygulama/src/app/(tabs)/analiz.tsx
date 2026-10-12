@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Backdrop } from '@/components/Backdrop';
 import { Icon, type IconName } from '@/components/Icon';
 import { DonutChart } from '@/components/DonutChart';
 import { useTabBarSpace } from '@/components/TabBar';
+import { TopBlur, useScrollY } from '@/components/TopBlur';
 import { CATEGORY } from '@/lib/categories';
 import { dur, fmt, hm, tl } from '@/lib/format';
 import {
@@ -44,6 +45,8 @@ type Bar = { v: number; label: string; top?: string; hl?: boolean; sel?: boolean
 export default function Analiz() {
   const { c } = useTheme();
   const tabSpace = useTabBarSpace();
+  const insets = useSafeAreaInsets();
+  const { y, onScroll } = useScrollY();
   const s = styles(c);
   const { current, past } = useShift();
   const [period, setPeriod] = useState<Period>({ mode: 'gun', off: 0, month: null });
@@ -174,9 +177,12 @@ export default function Analiz() {
   const hours = A.ms / HOUR;
 
   return (
-    <SafeAreaView style={s.screen} edges={['top']}>
+    <View style={s.screen}>
       <Backdrop />
-      <ScrollView contentContainerStyle={[s.body, { paddingBottom: tabSpace }]} showsVerticalScrollIndicator={false}>
+      <Animated.ScrollView
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={[s.body, { paddingTop: insets.top, paddingBottom: tabSpace }]} showsVerticalScrollIndicator={false}>
         {head}
 
         {empty ? (
@@ -252,8 +258,9 @@ export default function Analiz() {
             <Breakdown c={c} title="Gider dağılımı" cats={EXPENSE} A={A} total={A.expense} last />
           </>
         )}
-      </ScrollView>
-    </SafeAreaView>
+      </Animated.ScrollView>
+      <TopBlur y={y} />
+    </View>
   );
 }
 
