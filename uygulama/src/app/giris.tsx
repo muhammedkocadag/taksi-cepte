@@ -8,6 +8,7 @@ import { Backdrop } from '@/components/Backdrop';
 import { CarPicker } from '@/components/CarPicker';
 import { Icon } from '@/components/Icon';
 import { IlPicker } from '@/components/IlPicker';
+import { Logo } from '@/components/Logo';
 import { Sheet } from '@/components/Sheet';
 import { Button, Field } from '@/components/ui';
 import { APP_NAME, TAGLINE } from '@/lib/brand';
@@ -59,11 +60,10 @@ function PhoneStep({ phone, setPhone, onNext }: { phone: string; setPhone: (v: s
   return (
     <>
       <View style={s.brand}>
-        <View style={s.logo}>
-          <Icon name="car" size={44} color={solid.onYellow} />
-        </View>
+        <Logo width={104} />
+        {/* Logodaki gibi: "Taksi" sarı, "Cepte" yazı renginde (koyu temada beyaz). */}
         <Text style={s.wordmark}>
-          {APP_NAME[0]} <Text style={{ color: c.yellowInk }}>{APP_NAME[1]}</Text>
+          <Text style={{ color: c.yellowInk }}>{APP_NAME[0]}</Text> {APP_NAME[1]}
         </Text>
         <Text style={s.tagline}>{TAGLINE}</Text>
         <Text style={[s.sub, { textAlign: 'center', marginTop: 18 }]}>Hoş geldin! Devam etmek için telefon numaranı gir.</Text>
@@ -296,7 +296,6 @@ const styles = (c: Palette) =>
     grow: { flexGrow: 1, minHeight: 24 },
     row: { flexDirection: 'row' },
     brand: { alignItems: 'center', marginTop: 40 },
-    logo: { width: 88, height: 88, borderRadius: 26, backgroundColor: c.yellow, alignItems: 'center', justifyContent: 'center' },
     wordmark: { ...fonts.uiHeavy, fontSize: 34, color: c.text, marginTop: 18, letterSpacing: -0.8 },
     tagline: { ...fonts.uiSemi, fontSize: 15, color: c.muted, marginTop: 4 },
     h2: { ...fonts.uiHeavy, fontSize: 30, color: c.text, letterSpacing: -0.6, marginTop: 18 },
