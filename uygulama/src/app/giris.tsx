@@ -10,7 +10,7 @@ import { Icon } from '@/components/Icon';
 import { IlPicker } from '@/components/IlPicker';
 import { Logo } from '@/components/Logo';
 import { Sheet } from '@/components/Sheet';
-import { Button, Field } from '@/components/ui';
+import { Button, Field, PickBox } from '@/components/ui';
 import { APP_NAME, TAGLINE } from '@/lib/brand';
 import { formatPlate, plateOk } from '@/lib/data';
 import { useProfile } from '@/store/profile';
@@ -57,6 +57,7 @@ function PhoneStep({ phone, setPhone, onNext }: { phone: string; setPhone: (v: s
   const s = styles(c);
   const err = phoneErr(phone);
   const ok = phone.length === 10 && !err;
+  const [focused, setFocused] = useState(false);
   return (
     <>
       <View style={s.brand}>
@@ -66,11 +67,12 @@ function PhoneStep({ phone, setPhone, onNext }: { phone: string; setPhone: (v: s
           <Text style={{ color: c.yellowInk }}>{APP_NAME[0]}</Text> {APP_NAME[1]}
         </Text>
         <Text style={s.tagline}>{TAGLINE}</Text>
-        <Text style={[s.sub, { textAlign: 'center', marginTop: 18 }]}>Hoş geldin! Devam etmek için telefon numaranı gir.</Text>
+        <Text style={[s.sub, { textAlign: 'center', marginTop: 18 }]}>Devam etmek için telefon numaranı gir.</Text>
       </View>
       <View style={s.grow} />
       <Text style={s.label}>Telefon numarası</Text>
-      <View style={[s.phone, { borderColor: err ? c.red : c.line }]}>
+      {/* Cam kutu; yazarken kenar sarı, hatada kırmızı. */}
+      <View style={[s.phone, { borderColor: err ? c.red : focused ? c.yellow : c.cardBorder }]}>
         <Text style={s.cc}>+90</Text>
         <TextInput
           value={fmtPhone(phone)}
@@ -81,12 +83,14 @@ function PhoneStep({ phone, setPhone, onNext }: { phone: string; setPhone: (v: s
           placeholder="5XX XXX XX XX"
           placeholderTextColor={c.faint}
           style={s.phoneInput}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           accessibilityLabel="Telefon numarası"
         />
       </View>
       <Text style={[s.hint, err ? { color: c.red } : null]}>{err || 'Giriş ya da kayıt için SMS ile kod göndereceğiz.'}</Text>
       <View style={[s.row, { marginTop: 22 }]}>
-        <Button label="Devam et" icon="right" onPress={onNext} disabled={!ok} />
+        <Button label="Devam et" icon="right" iconAfter onPress={onNext} disabled={!ok} />
       </View>
       <Text style={s.legal}>
         Devam ederek <Text style={s.legalLink}>Kullanım Koşulları</Text>'nı ve <Text style={s.legalLink}>Aydınlatma Metni</Text>'ni kabul
@@ -171,7 +175,7 @@ function CodeStep({ phone, onBack, onNext }: { phone: string; onBack: () => void
             }}
           >
             <Text style={[s.link, left > 0 && { color: c.faint }]}>
-              {left > 0 ? `Tekrar gönder (0:${String(left).padStart(2, '0')})` : 'Kodu tekrar gönder'}
+              {left > 0 ? `Tekrar gönder (${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')})` : 'Kodu tekrar gönder'}
             </Text>
           </Pressable>
           <Pressable onPress={onBack}>
@@ -236,7 +240,7 @@ function ProfileStep({ phone }: { phone: string }) {
       <Text style={s.sub}>Seni ve aracını tanıyalım. Eksik kalan bilgileri sonra Araç ekranından tamamlayabilirsin.</Text>
       <View style={{ gap: 22, marginTop: 24 }}>
         <Field label="Adın" value={name} onChange={clear(setName)} placeholder="Örn. Miraç" autoCapitalize="words" />
-        <PickField label="Çalıştığın il" value={il} placeholder="İl seç" onPress={() => setSheet('il')} />
+        <PickBox label="Çalıştığın il" value={il} placeholder="İl seç" onPress={() => setSheet('il')} />
         <Field
           label="Plakan"
           value={plate}
@@ -244,12 +248,12 @@ function ProfileStep({ phone }: { phone: string }) {
           placeholder="34 T 1234"
           autoCapitalize="characters"
         />
-        <PickField label="Aracın" value={car} placeholder="Marka, model ve yıl seç" onPress={() => setSheet('car')} />
+        <PickBox label="Aracın" value={car} placeholder="Marka, model ve yıl seç" onPress={() => setSheet('car')} />
         <Field label="Göstergedeki km" value={odo} onChange={clear(setOdo)} digits={7} suffix="KM" placeholder="Örn. 148500" />
       </View>
       {!!err && <Text style={[s.hint, { color: c.red, marginTop: 16 }]}>{err}</Text>}
       <View style={[s.row, { marginTop: 26 }]}>
-        <Button label="Uygulamaya başla" icon="check" variant="green" onPress={finish} />
+        <Button label="Uygulamaya başla" icon="right" iconAfter onPress={finish} />
       </View>
 
       <IlPicker
@@ -275,20 +279,6 @@ function ProfileStep({ phone }: { phone: string }) {
   );
 }
 
-function PickField({ label, value, placeholder, onPress }: { label: string; value: string; placeholder: string; onPress: () => void }) {
-  const { c } = useTheme();
-  const s = styles(c);
-  return (
-    <View style={{ gap: 6 }}>
-      <Text style={s.fieldLabel}>{label}</Text>
-      <Pressable onPress={onPress} style={s.pickBtn} accessibilityRole="button" accessibilityLabel={label}>
-        <Text style={[s.pickText, { color: value ? c.text : c.faint }]}>{value || placeholder}</Text>
-        <Icon name="right" size={18} color={c.faint} />
-      </Pressable>
-    </View>
-  );
-}
-
 const styles = (c: Palette) =>
   StyleSheet.create({
     screen: { flex: 1, backgroundColor: 'transparent' },
@@ -301,7 +291,7 @@ const styles = (c: Palette) =>
     h2: { ...fonts.uiHeavy, fontSize: 30, color: c.text, letterSpacing: -0.6, marginTop: 18 },
     sub: { ...fonts.ui, fontSize: 16.5, color: c.muted, lineHeight: 24, marginTop: 8 },
     label: { ...fonts.uiBold, fontSize: 14, color: c.muted, marginBottom: 8 },
-    phone: { flexDirection: 'row', alignItems: 'center', height: 62, borderRadius: 16, borderWidth: 1.5, backgroundColor: c.surface, paddingHorizontal: 16, gap: 12 },
+    phone: { flexDirection: 'row', alignItems: 'center', height: 62, borderRadius: 16, borderWidth: 1.5, backgroundColor: c.card, paddingHorizontal: 16, gap: 12 },
     cc: { ...fonts.numHeavy, fontSize: 20, color: c.muted },
     phoneInput: { flex: 1, ...fonts.numHeavy, fontSize: 22, color: c.text, letterSpacing: 0.5 },
     hint: { ...fonts.ui, fontSize: 14.5, color: c.faint, marginTop: 10 },
@@ -317,9 +307,6 @@ const styles = (c: Palette) =>
     link: { ...fonts.uiBold, fontSize: 15, color: c.yellowInk },
     verified: { flexDirection: 'row', alignItems: 'center', gap: 8, justifyContent: 'center', marginTop: 20 },
     verifiedText: { ...fonts.uiBold, fontSize: 16 },
-    fieldLabel: { ...fonts.uiBold, fontSize: 14, color: c.muted },
-    pickBtn: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 2, borderBottomColor: c.yellow, paddingVertical: 8 },
-    pickText: { flex: 1, ...fonts.uiBold, fontSize: 20 },
     dots: { flexDirection: 'row', gap: 6, justifyContent: 'center', marginTop: 18 },
     dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: c.line },
     dotOn: { width: 22, backgroundColor: c.yellow },

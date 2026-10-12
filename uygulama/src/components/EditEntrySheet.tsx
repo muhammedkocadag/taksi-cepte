@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { Sheet } from '@/components/Sheet';
-import { Button } from '@/components/ui';
+import { Button, fieldBox } from '@/components/ui';
 import { CATEGORY } from '@/lib/categories';
 import { dayLabel, hm } from '@/lib/format';
 import { EXPENSE, INCOME, useShift, type Category, type Entry } from '@/store/shift';
@@ -73,7 +73,7 @@ export function EditEntrySheet({ entry, onClose }: { entry: Entry | null; onClos
           </Text>
         )}
       </View>
-      <View style={[styles.field, { borderBottomColor: c.yellow }]}>
+      <View style={[styles.field, fieldBox(c, true)]}>
         <Text style={[styles.cur, { color: c.yellowInk }]}>₺</Text>
         <TextInput
           value={amount}
@@ -104,7 +104,7 @@ export function EditEntrySheet({ entry, onClose }: { entry: Entry | null; onClos
 const styles = StyleSheet.create({
   title: { ...fonts.uiBold, fontSize: 21 },
   sub: { ...fonts.ui, fontSize: 14.5, marginTop: 2 },
-  field: { flexDirection: 'row', alignItems: 'center', gap: 8, borderBottomWidth: 2, paddingBottom: 6 },
+  field: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 60, paddingHorizontal: 14, borderRadius: 14, borderWidth: 1.5 },
   cur: { ...fonts.numHeavy, fontSize: 26 },
   input: { flex: 1, ...fonts.numHeavy, fontSize: 30, paddingVertical: 4 },
   group: { ...fonts.uiBold, fontSize: 15, marginBottom: -8 },

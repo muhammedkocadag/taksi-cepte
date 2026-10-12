@@ -260,7 +260,7 @@ const styles = (c: Palette) =>
     iconBox: { width: 28, alignItems: 'center' },
     rowTitle: { ...fonts.uiSemi, fontSize: 17, color: c.text },
     rowSub: { ...fonts.ui, fontSize: 14, color: c.faint, marginTop: 2 },
-    goal: { flexDirection: 'row', alignItems: 'center', gap: 4, borderBottomWidth: 2, borderBottomColor: c.yellow, minWidth: 110 },
+    goal: { flexDirection: 'row', alignItems: 'center', gap: 4, minWidth: 120, height: 44, paddingHorizontal: 12, borderRadius: 12, borderWidth: 1.5, backgroundColor: c.card, borderColor: c.cardBorder },
     goalCur: { ...fonts.numHeavy, fontSize: 18, color: c.muted },
     goalInput: { flex: 1, ...fonts.numHeavy, fontSize: 20, color: c.text, paddingVertical: 4, textAlign: 'right' },
     version: { ...fonts.ui, fontSize: 13, color: c.faint, textAlign: 'center', marginTop: 8 },

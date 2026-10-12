@@ -4,7 +4,7 @@ import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { Sheet } from '@/components/Sheet';
-import { Button, Field, SheetHeader } from '@/components/ui';
+import { Button, Field, PickBox, SheetHeader } from '@/components/ui';
 import { dateLabel, fmt } from '@/lib/format';
 import { MAINT_NAME, nextYear, type MaintKey } from '@/lib/maintenance';
 import { useVehicle } from '@/store/vehicle';
@@ -142,14 +142,7 @@ function DateSheet({ kind, onClose }: { kind: 'muayene' | 'sigorta' | null; onCl
           <Text style={[styles.hint, { color: c.faint, textAlign: 'center', marginTop: -6 }]}>
             Yeni bitiş tarihi: {dateLabel(nextYear())}
           </Text>
-          <View style={{ gap: 6 }}>
-            <Text style={[styles.label, { color: c.muted }]}>Ya da bitiş tarihini seç</Text>
-            <Pressable onPress={pick} style={[styles.dateBtn, { borderBottomColor: c.yellow }]} accessibilityRole="button">
-              <Icon name="cal" size={20} color={c.muted} />
-              <Text style={[styles.dateText, { color: c.text }]}>{dateLabel(date)}</Text>
-              <Icon name={picking ? 'up' : 'right'} size={18} color={c.faint} />
-            </Pressable>
-          </View>
+          <PickBox label="Ya da bitiş tarihini seç" value={dateLabel(date)} placeholder="" onPress={pick} leading="cal" icon={picking ? 'up' : 'right'} />
           {picking && Platform.OS === 'ios' && (
             <DateTimePicker
               value={new Date(date)}
@@ -176,6 +169,4 @@ const styles = StyleSheet.create({
   buttons: { flexDirection: 'row', gap: 10 },
   two: { flexDirection: 'row', gap: 16 },
   label: { ...fonts.uiBold, fontSize: 14 },
-  dateBtn: { flexDirection: 'row', alignItems: 'center', gap: 10, borderBottomWidth: 2, paddingVertical: 8 },
-  dateText: { flex: 1, ...fonts.uiBold, fontSize: 20 },
 });

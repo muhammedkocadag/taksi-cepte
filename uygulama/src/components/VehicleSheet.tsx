@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { CarPicker } from '@/components/CarPicker';
 import { Icon } from '@/components/Icon';
 import { Sheet } from '@/components/Sheet';
-import { Button, Choice, Field, SheetHeader } from '@/components/ui';
+import { Button, Choice, Field, PickBox, SheetHeader } from '@/components/ui';
 import { FUELS, formatPlate, plateOk } from '@/lib/data';
 import { useVehicle } from '@/store/vehicle';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -80,13 +80,7 @@ export function VehicleSheet({ visible, onClose }: { visible: boolean; onClose: 
         placeholder="34 T 1234"
         autoCapitalize="characters"
       />
-      <View style={{ gap: 6 }}>
-        <Text style={[styles.label, { color: c.muted }]}>Araç</Text>
-        <Pressable onPress={() => setPicking(true)} style={[styles.pickBtn, { borderBottomColor: c.yellow }]} accessibilityRole="button">
-          <Text style={[styles.pickBtnText, { color: car ? c.text : c.faint }]}>{car || 'Marka, model ve yıl seç'}</Text>
-          <Icon name="right" size={18} color={c.faint} />
-        </Pressable>
-      </View>
+      <PickBox label="Araç" value={car} placeholder="Marka, model ve yıl seç" onPress={() => setPicking(true)} />
       <Field
         label="Gösterge"
         value={odo}
@@ -117,8 +111,6 @@ export function VehicleSheet({ visible, onClose }: { visible: boolean; onClose: 
 
 const styles = StyleSheet.create({
   label: { ...fonts.uiBold, fontSize: 14 },
-  pickBtn: { flexDirection: 'row', alignItems: 'center', borderBottomWidth: 2, paddingVertical: 8 },
-  pickBtnText: { flex: 1, ...fonts.uiBold, fontSize: 20 },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   err: { ...fonts.uiBold, fontSize: 14.5 },
   buttons: { flexDirection: 'row', gap: 10 },

@@ -3,7 +3,7 @@ import { StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { Sheet } from '@/components/Sheet';
-import { Button, SheetHeader } from '@/components/ui';
+import { Button, SheetHeader, fieldBox } from '@/components/ui';
 import { dur, fmt, tl } from '@/lib/format';
 import { totals, useShift, type Shift } from '@/store/shift';
 import { useVehicle } from '@/store/vehicle';
@@ -87,7 +87,7 @@ export function EndShiftSheet({ visible, onClose }: { visible: boolean; onClose:
         subtitle={current ? `${dur(Date.now() - current.start)} · Ciro ${tl(t.revenue)}` : undefined}
       />
       <Text style={[styles.q, { color: c.text }]}>Bu vardiyada kaç km yaptın?</Text>
-      <View style={[styles.field, { borderBottomColor: c.yellow }]}>
+      <View style={[styles.field, fieldBox(c, true)]}>
         <TextInput
           value={km}
           onChangeText={(v) => setKm(v.replace(/\D/g, '').slice(0, 4))}
@@ -113,7 +113,7 @@ export function EndShiftSheet({ visible, onClose }: { visible: boolean; onClose:
 
 const styles = StyleSheet.create({
   q: { ...fonts.uiBold, fontSize: 16, marginBottom: -6 },
-  field: { flexDirection: 'row', alignItems: 'center', gap: 8, borderBottomWidth: 2, paddingBottom: 6 },
+  field: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 60, paddingHorizontal: 14, borderRadius: 14, borderWidth: 1.5 },
   input: { flex: 1, ...fonts.numHeavy, fontSize: 28, paddingVertical: 4 },
   suffix: { ...fonts.uiBold, fontSize: 15 },
   hint: { ...fonts.ui, fontSize: 13.5, marginTop: -6 },
