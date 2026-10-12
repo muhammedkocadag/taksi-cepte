@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taksi Cepte - Giriş & Kayıt (AuthFlow)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              yellow: '#FACC15',
+              dark: '#0D1117',
+              card: '#161B22',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.25; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(1.05); }
+    }
+    .animate-glow {
+      animation: pulseGlow 3s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-[#0b0e14] text-gray-100 min-h-screen flex items-center justify-center p-0 sm:p-4 font-sans select-none antialiased">
+
+  <!-- Mobile Shell Frame (390px x 844px style) -->
+  <div class="relative w-full max-w-[400px] min-h-screen sm:min-h-[844px] bg-[#111620] sm:rounded-[42px] border border-gray-800 shadow-[0_25px_60px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col justify-between p-6">
+    
+    <!-- Background Ambient Glows -->
+    <div class="absolute -top-20 -left-20 w-64 h-64 bg-amber-400/10 rounded-full blur-3xl pointer-events-none animate-glow"></div>
+    <div class="absolute -bottom-20 -right-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Status Bar Mockup -->
+    <div class="flex items-center justify-between text-xs text-gray-400 pt-1 pb-4 px-2 z-10">
+      <span class="font-bold tracking-tight text-white">09:41</span>
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-signal text-[10px]"></i>
+        <i class="fa-solid fa-wifi text-[10px]"></i>
+        <i class="fa-solid fa-battery-full text-xs text-white"></i>
+      </div>
+    </div>
+
+    <!-- ==================== STEP 1: PHONE ENTRY ==================== -->
+    <div id="step-phone" class="flex-1 flex flex-col justify-between pt-2 pb-4 z-10">
+      <!-- Top Branding -->
+      <div class="flex flex-col items-center text-center mt-4">
+        <!-- Friendly Taxi Icon / Badge -->
+        <div class="relative mb-4 group cursor-pointer">
+          <div class="absolute -inset-2 bg-amber-400/25 rounded-3xl blur-xl animate-pulse"></div>
+          <div class="relative w-24 h-24 rounded-3xl bg-gradient-to-tr from-amber-500 to-yellow-300 p-0.5 shadow-2xl flex items-center justify-center">
+            <div class="w-full h-full bg-[#0d1117] rounded-[22px] flex items-center justify-center">
+              <i class="fa-solid fa-taxi text-4xl text-amber-400 drop-shadow-[0_2px_10px_rgba(250,204,21,0.5)]"></i>
+            </div>
+          </div>
+        </div>
+
+        <h1 class="text-3xl font-black tracking-tight text-white flex items-center gap-2">
+          Taksi <span class="text-amber-400">Cepte</span>
+        </h1>
+        
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-800/90 border border-gray-700/70 text-xs font-semibold text-gray-300 mt-2.5 shadow-sm">
+          <i class="fa-solid fa-wand-magic-sparkles text-amber-400 text-[11px]"></i>
+          <span>Taksicinin Dijital Cüzdanı</span>
+        </div>
+
+        <p class="text-sm font-medium text-gray-400 mt-5 max-w-xs leading-relaxed">
+          Hoş Geldiniz! Devam etmek için telefon numaranızı girin.
+        </p>
+      </div>
+
+      <!-- Phone Input Section -->
+      <div class="my-auto py-5">
+        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-2 ml-1">
+          Telefon Numarası
+        </label>
+        <div class="relative flex items-center">
+          <div class="absolute left-4 flex items-center gap-2 text-gray-400 font-bold text-base pointer-events-none border-r border-gray-700 pr-3">
+            <i class="fa-solid fa-phone text-amber-400 text-sm"></i>
+            <span class="text-gray-300 text-sm">TR</span>
+          </div>
+          <input
+            id="phone-input"
+            type="tel"
+            value="0 (555) 123 45 67"
+            placeholder="0 (5XX) XXX XX XX"
+            class="w-full pl-24 pr-4 py-4 bg-gray-800/90 border-2 border-gray-700/80 focus:border-amber-400 focus:bg-gray-800 text-white font-bold text-lg rounded-2xl placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-amber-400/10 transition-all duration-200 tracking-wide"
+          />
+        </div>
+        <p class="text-[11px] text-gray-500 mt-2 ml-1 flex items-center gap-1.5">
+          <i class="fa-solid fa-shield-halved text-gray-400 text-[10px]"></i>
+          Giriş veya kayıt için 4 haneli SMS kodu alacaksınız.
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="space-y-3 pt-2">
+        <!-- Kayıt Ol Button (Solid Taxi Yellow) -->
+        <button
+          onclick="goToStep('otp')"
+          type="button"
+          class="w-full py-4 bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-gray-950 font-black text-base tracking-wider uppercase rounded-2xl shadow-lg shadow-amber-400/25 transition-all duration-200 flex items-center justify-center gap-2"
+        >
+          <span>Kayıt Ol</span>
+          <i class="fa-solid fa-chevron-right text-xs stroke-2"></i>
+        </button>
+
+        <!-- Giriş Yap Button (Dark Gray) -->
+        <button
+          onclick="goToStep('otp')"
+          type="button"
+          class="w-full py-3.5 bg-gray-800/90 hover:bg-gray-750 active:scale-[0.98] border border-gray-700 text-white font-bold text-base tracking-wider uppercase rounded-2xl shadow-md transition-all duration-200 flex items-center justify-center gap-2"
+        >
+          <span>Giriş Yap</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== STEP 2: OTP VERIFICATION ==================== -->
+    <div id="step-otp" class="hidden flex-1 flex-col justify-between pt-2 pb-4 z-10">
+      <!-- Back Navigation & Title -->
+      <div>
+        <button
+          type="button"
+          onclick="goToStep('phone')"
+          class="inline-flex items-center gap-2 px-3 py-2 -ml-2 rounded-xl text-sm font-bold text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+        >
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Geri</span>
+        </button>
+
+        <div class="mt-5">
+          <div class="w-12 h-12 rounded-2xl bg-amber-400/15 border border-amber-400/30 flex items-center justify-center text-amber-400 mb-3.5 shadow-sm">
+            <i class="fa-solid fa-key text-xl"></i>
+          </div>
+          <h2 class="text-2xl font-black text-white tracking-tight">
+            Doğrulama Kodu
+          </h2>
+          <p class="text-sm text-gray-400 mt-1.5 font-medium leading-relaxed">
+            Telefonunuza gönderilen <span class="text-amber-400 font-bold">4 haneli</span> kodu girin.
+          </p>
+          <div class="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-gray-800/70 border border-gray-700/60 text-xs text-gray-300 font-mono">
+            <i class="fa-solid fa-comment-sms text-amber-400"></i>
+            <span id="otp-phone-display">0 (555) 123 45 67</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- OTP 4 Digit Boxes -->
+      <div class="my-auto py-6">
+        <div class="flex justify-between gap-3 max-w-xs mx-auto">
+          <input type="text" maxlength="1" value="7" class="w-16 h-18 py-3.5 text-center text-3xl font-black font-mono text-white bg-gray-800/90 border-2 border-gray-700/80 focus:border-amber-400 focus:bg-gray-800 focus:ring-4 focus:ring-amber-400/20 rounded-2xl outline-none transition-all duration-200" />
+          <input type="text" maxlength="1" value="4" class="w-16 h-18 py-3.5 text-center text-3xl font-black font-mono text-white bg-gray-800/90 border-2 border-gray-700/80 focus:border-amber-400 focus:bg-gray-800 focus:ring-4 focus:ring-amber-400/20 rounded-2xl outline-none transition-all duration-200" />
+          <input type="text" maxlength="1" value="8" class="w-16 h-18 py-3.5 text-center text-3xl font-black font-mono text-white bg-gray-800/90 border-2 border-gray-700/80 focus:border-amber-400 focus:bg-gray-800 focus:ring-4 focus:ring-amber-400/20 rounded-2xl outline-none transition-all duration-200" />
+          <input type="text" maxlength="1" value="2" class="w-16 h-18 py-3.5 text-center text-3xl font-black font-mono text-white bg-gray-800/90 border-2 border-amber-400 focus:bg-gray-800 ring-2 ring-amber-400/30 rounded-2xl outline-none transition-all duration-200" />
+        </div>
+
+        <div class="text-center mt-6">
+          <button type="button" class="text-xs font-semibold text-gray-400 hover:text-amber-400 transition-colors">
+            Kodu almadınız mı? <span class="underline font-bold text-amber-400">Tekrar Gönder</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Verify Button -->
+      <div class="pt-2">
+        <button
+          onclick="goToStep('onboarding')"
+          type="button"
+          class="w-full py-4 bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-gray-950 font-black text-base tracking-wider uppercase rounded-2xl shadow-lg shadow-amber-400/25 transition-all duration-200 flex items-center justify-center gap-2"
+        >
+          <i class="fa-solid fa-shield-check text-lg"></i>
+          <span>Doğrula</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- ==================== STEP 3: FIRST-TIME ONBOARDING ==================== -->
+    <div id="step-onboarding" class="hidden flex-1 flex-col justify-between pt-2 pb-4 z-10">
+      <div>
+        <!-- Top Tag & Title -->
+        <div class="mb-4">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-xs font-black text-amber-400 uppercase tracking-wider mb-2">
+            <i class="fa-solid fa-circle-check text-xs"></i>
+            <span>Son Adım</span>
+          </div>
+          <h2 class="text-3xl font-black text-white tracking-tight">
+            Son Bir Adım!
+          </h2>
+          <p class="text-xs text-gray-400 mt-1 leading-relaxed font-medium">
+            Sizi ve aracınızı tanıyalım. Bu bilgileri daha sonra değiştirebilirsiniz.
+          </p>
+        </div>
+
+        <!-- Form Fields -->
+        <form id="onboarding-form" onsubmit="finishFlow(event)" class="space-y-3">
+          <!-- Field 1: Adınız -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-1 ml-1 flex items-center gap-1.5">
+              <i class="fa-regular fa-user text-amber-400 text-xs"></i>
+              Adınız
+            </label>
+            <input
+              type="text"
+              required
+              value="Miraç"
+              placeholder="örn. Miraç"
+              class="w-full px-4 py-3 bg-gray-800/90 border border-gray-700/80 focus:border-amber-400 text-white font-bold text-sm rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400/15 transition-all"
+            />
+          </div>
+
+          <!-- Field 2: Plakanız -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-1 ml-1 flex items-center gap-1.5">
+              <i class="fa-solid fa-id-card text-amber-400 text-xs"></i>
+              Plakanız
+            </label>
+            <div class="relative">
+              <input
+                type="text"
+                required
+                value="06 T 1234"
+                placeholder="örn. 06 T 1234"
+                class="w-full px-4 py-3 bg-gray-800/90 border border-gray-700/80 focus:border-amber-400 text-white font-black text-sm uppercase rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400/15 transition-all tracking-wider"
+              />
+            </div>
+          </div>
+
+          <!-- Field 3: Araç Modeli -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-1 ml-1 flex items-center gap-1.5">
+              <i class="fa-solid fa-car text-amber-400 text-xs"></i>
+              Araç Modeli
+            </label>
+            <input
+              type="text"
+              required
+              value="2006 Honda Civic"
+              placeholder="örn. 2006 Honda Civic"
+              class="w-full px-4 py-3 bg-gray-800/90 border border-gray-700/80 focus:border-amber-400 text-white font-bold text-sm rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400/15 transition-all"
+            />
+          </div>
+
+          <!-- Field 4: Güncel KM -->
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-gray-300 mb-1 ml-1 flex items-center gap-1.5">
+              <i class="fa-solid fa-gauge-high text-amber-400 text-xs"></i>
+              Şu anki KM
+            </label>
+            <div class="relative">
+              <input
+                type="number"
+                required
+                value="148500"
+                placeholder="örn. 148500"
+                class="w-full px-4 py-3 bg-gray-800/90 border border-gray-700/80 focus:border-amber-400 text-white font-black text-sm rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400/15 transition-all"
+              />
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">
+                KM
+              </span>
+            </div>
+          </div>
+        </form>
+
+        <div id="success-banner" class="hidden p-5 bg-emerald-500/15 border-2 border-emerald-400/50 rounded-2xl text-center space-y-2 mt-4">
+          <i class="fa-solid fa-circle-check text-3xl text-emerald-400"></i>
+          <h4 class="text-base font-black text-white">Profil Başarıyla Oluşturuldu!</h4>
+          <p class="text-xs text-emerald-200">Taksi Cepte ana ekranına aktarılıyorsunuz...</p>
+        </div>
+      </div>
+
+      <!-- Glowing Green Submit Button -->
+      <div class="pt-3">
+        <button
+          type="submit"
+          form="onboarding-form"
+          class="relative w-full py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-white font-black text-base tracking-wider uppercase transition-all duration-200 flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(16,185,129,0.5)]"
+        >
+          <i class="fa-solid fa-circle-check text-lg"></i>
+          <span>UYGULAMAYA BAŞLA</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step Indicator Dots (Bottom Mini Bar) -->
+    <div class="flex items-center justify-center gap-2 pt-2 border-t border-gray-800/80 z-10">
+      <div id="dot-phone" onclick="goToStep('phone')" class="w-8 h-1.5 rounded-full bg-amber-400 cursor-pointer transition-all"></div>
+      <div id="dot-otp" onclick="goToStep('otp')" class="w-2.5 h-1.5 rounded-full bg-gray-700 cursor-pointer transition-all"></div>
+      <div id="dot-onboarding" onclick="goToStep('onboarding')" class="w-2.5 h-1.5 rounded-full bg-gray-700 cursor-pointer transition-all"></div>
+    </div>
+
+  </div>
+
+  <script>
+    function goToStep(step) {
+      document.getElementById('step-phone').classList.add('hidden');
+      document.getElementById('step-phone').classList.remove('flex');
+      document.getElementById('step-otp').classList.add('hidden');
+      document.getElementById('step-otp').classList.remove('flex');
+      document.getElementById('step-onboarding').classList.add('hidden');
+      document.getElementById('step-onboarding').classList.remove('flex');
+
+      // Reset dots
+      document.getElementById('dot-phone').className = "w-2.5 h-1.5 rounded-full bg-gray-700 cursor-pointer transition-all";
+      document.getElementById('dot-otp').className = "w-2.5 h-1.5 rounded-full bg-gray-700 cursor-pointer transition-all";
+      document.getElementById('dot-onboarding').className = "w-2.5 h-1.5 rounded-full bg-gray-700 cursor-pointer transition-all";
+
+      if (step === 'phone') {
+        const el = document.getElementById('step-phone');
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+        document.getElementById('dot-phone').className = "w-8 h-1.5 rounded-full bg-amber-400 cursor-pointer transition-all";
+      } else if (step === 'otp') {
+        const el = document.getElementById('step-otp');
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+        document.getElementById('dot-otp').className = "w-8 h-1.5 rounded-full bg-amber-400 cursor-pointer transition-all";
+        const val = document.getElementById('phone-input').value;
+        if (val) document.getElementById('otp-phone-display').innerText = val;
+      } else if (step === 'onboarding') {
+        const el = document.getElementById('step-onboarding');
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+        document.getElementById('dot-onboarding').className = "w-8 h-1.5 rounded-full bg-emerald-400 cursor-pointer transition-all";
+      }
+    }
+
+    function finishFlow(e) {
+      e.preventDefault();
+      document.getElementById('onboarding-form').classList.add('hidden');
+      document.getElementById('success-banner').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

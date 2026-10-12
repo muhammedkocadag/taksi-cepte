@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taksi Cepte - Araç & Bakım Takibi</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brandYellow: '#f59e0b',
+            taxiYellow: '#eab308',
+            darkBg: '#0b0f17',
+            cardBg: '#131b26',
+            cardBorder: '#1f2937',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0b0f17;
+      color: #f3f4f6;
+    }
+    .plate-font {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      letter-spacing: 0.12em;
+    }
+    .mono-num {
+      font-family: 'JetBrains Mono', monospace;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#0b0f17] flex justify-center items-start antialiased selection:bg-yellow-400 selection:text-black">
+
+  <!-- Mobile Device Container -->
+  <main class="w-full max-w-md min-h-screen bg-[#0d131f] border-x border-gray-800/80 shadow-2xl flex flex-col relative pb-28">
+
+    <!-- Top Status / Header -->
+    <header class="px-5 pt-4 pb-3 flex items-center justify-between border-b border-gray-800/60 bg-[#0d131f]/95 sticky top-0 z-20 backdrop-blur-md">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-yellow-400/10 border border-yellow-400/30 flex items-center justify-center text-yellow-400">
+          <i data-lucide="car-taxi" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <span class="text-[10px] uppercase tracking-widest text-gray-400 font-bold block">Taksi Cepte</span>
+          <h1 class="text-base font-extrabold text-white tracking-tight leading-tight">Araç Profili & Bakım</h1>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          Aktif Araç
+        </span>
+      </div>
+    </header>
+
+    <!-- Main Scrollable Content -->
+    <div class="flex-1 px-4 py-4 space-y-4">
+
+      <!-- SECTION 1: Vehicle Profile Card (Araç Kimliği) -->
+      <section class="bg-[#131b26] rounded-3xl p-5 border border-gray-800 shadow-xl relative overflow-hidden">
+        <!-- Glow gradient background -->
+        <div class="absolute -top-16 -right-16 w-44 h-44 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- Car Silhouette & Plate Header -->
+        <div class="flex flex-col items-center text-center pt-1 pb-3">
+          <!-- Car Silhouette Graphic Badge -->
+          <div class="relative mb-3">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-b from-gray-800/80 to-gray-900 border border-gray-700/80 flex items-center justify-center text-yellow-400 shadow-lg">
+              <!-- Stylized Modern Car Icon -->
+              <svg class="w-12 h-12 text-yellow-400 drop-shadow-md" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2"/>
+                <circle cx="7" cy="17" r="2"/>
+                <path d="M9 17h6"/>
+                <circle cx="17" cy="17" r="2"/>
+              </svg>
+            </div>
+            <span class="absolute -bottom-1 -right-1 bg-yellow-400 text-gray-950 p-1 rounded-full shadow-md">
+              <i data-lucide="shield-check" class="w-3.5 h-3.5 stroke-[2.5]"></i>
+            </span>
+          </div>
+
+          <!-- Turkish Standard License Plate -->
+          <div class="inline-flex items-stretch bg-white rounded-lg border-2 border-black overflow-hidden shadow-2xl px-0 py-0 mb-2 select-all hover:scale-[1.02] transition-transform">
+            <!-- Left TR Blue Strip -->
+            <div class="bg-[#003399] px-2 py-1.5 flex flex-col justify-between items-center text-white min-w-[28px]">
+              <div class="flex gap-0.5 mt-0.5">
+                <span class="w-1 h-1 bg-yellow-300 rounded-full"></span>
+                <span class="w-1 h-1 bg-yellow-300 rounded-full"></span>
+              </div>
+              <span class="text-[11px] font-black tracking-tighter leading-none mt-1">TR</span>
+            </div>
+            <!-- Plate Number -->
+            <div class="px-3.5 py-1.5 flex items-center justify-center bg-white">
+              <span class="text-xl sm:text-2xl font-black text-black tracking-widest plate-font uppercase">
+                06 T 1234
+              </span>
+            </div>
+          </div>
+
+          <!-- Vehicle Model -->
+          <p class="text-xs font-semibold text-gray-400 flex items-center gap-1.5 mt-0.5">
+            <span>2006 Honda Civic</span>
+            <span class="text-gray-600">•</span>
+            <span class="text-gray-400">1.6 VTEC Benzin/LPG</span>
+          </p>
+        </div>
+
+        <div class="border-t border-gray-800/80 my-3"></div>
+
+        <!-- Current Mileage (Toplam KM) - Massive Display with Edit button -->
+        <div class="bg-[#0c121d] rounded-2xl p-4 border border-gray-800/90 flex items-center justify-between">
+          <div>
+            <div class="flex items-center gap-1.5 text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1">
+              <i data-lucide="gauge" class="w-3.5 h-3.5 text-yellow-400"></i>
+              <span>Toplam Kilometre</span>
+            </div>
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mono-num">
+                148.500
+              </span>
+              <span class="text-sm font-bold text-gray-400">km</span>
+            </div>
+          </div>
+
+          <!-- Edit Mileage Icon Button -->
+          <button 
+            id="quickKmModalBtn" 
+            class="group flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-gray-800/90 hover:bg-gray-700/90 active:scale-95 border border-gray-700/80 text-gray-200 transition-all shadow-sm"
+            title="Kilometreyi Güncelle"
+          >
+            <i data-lucide="pencil" class="w-4 h-4 text-yellow-400 group-hover:rotate-12 transition-transform"></i>
+            <span class="text-xs font-bold">Düzenle</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- SECTION 2: Maintenance Status (Bakım Durumu - Geri Sayım) -->
+      <section class="bg-[#131b26] rounded-3xl p-5 border border-gray-800 shadow-xl space-y-4">
+        
+        <div class="flex items-center justify-between pb-1">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-yellow-400"></div>
+            <h2 class="text-base font-extrabold text-white tracking-tight">Bakım Durumu</h2>
+          </div>
+          <span class="text-[11px] font-bold text-gray-400 bg-gray-800/80 px-2.5 py-1 rounded-full border border-gray-700/50">
+            3 Takip Kalemi
+          </span>
+        </div>
+
+        <p class="text-xs text-gray-400 leading-relaxed -mt-1">
+          Kritik periyotlar yaklaştıkça çubuklar dolar ve renkleri aciliyet durumuna göre değişir.
+        </p>
+
+        <!-- Progress Items List (Health Bar Style) -->
+        <div class="space-y-4 pt-1">
+
+          <!-- ITEM 1: Genel Bakım / Motor Yağı (CRITICAL - RED) -->
+          <div class="bg-[#0c121d] rounded-2xl p-3.5 border border-red-950/60 shadow-sm relative overflow-hidden group">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
+                  <i data-lucide="wrench" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-sm font-bold text-white tracking-tight">Genel Bakım</span>
+                    <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 border border-red-500/40 uppercase">
+                      Acil
+                    </span>
+                  </div>
+                  <span class="text-[11px] text-gray-400">Motor Yağı, Filtreler & Buji</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-sm font-extrabold text-red-400 mono-num">1.500 km</span>
+                <span class="block text-[10px] font-semibold text-gray-400">kaldı</span>
+              </div>
+            </div>
+
+            <!-- Health Bar / Progress Bar: Mostly filled (85%) & RED -->
+            <div class="w-full bg-gray-800/80 rounded-full h-3 p-0.5 overflow-hidden border border-gray-700/60">
+              <div 
+                class="bg-gradient-to-r from-red-600 to-red-400 h-full rounded-full transition-all duration-500 shadow-sm shadow-red-500/50 relative"
+                style="width: 85%;"
+              >
+                <!-- subtle stripe highlight -->
+                <div class="absolute inset-0 bg-white/10 rounded-full"></div>
+              </div>
+            </div>
+            <div class="flex justify-between items-center text-[10px] font-semibold text-gray-500 mt-1.5 px-0.5">
+              <span>Son Bakım: 140.000 km</span>
+              <span class="text-red-400 font-bold">%85 Kullanıldı</span>
+            </div>
+          </div>
+
+          <!-- ITEM 2: TÜVTÜRK Muayene (WARNING - ORANGE) -->
+          <div class="bg-[#0c121d] rounded-2xl p-3.5 border border-orange-950/60 shadow-sm relative overflow-hidden group">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400 shrink-0">
+                  <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-sm font-bold text-white tracking-tight">Muayene</span>
+                    <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/40 uppercase">
+                      Yaklaşıyor
+                    </span>
+                  </div>
+                  <span class="text-[11px] text-gray-400">TÜVTÜRK Periyodik Muayene</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-sm font-extrabold text-orange-400 mono-num">45 gün</span>
+                <span class="block text-[10px] font-semibold text-gray-400">kaldı</span>
+              </div>
+            </div>
+
+            <!-- Health Bar / Progress Bar: Half-filled (50%) & ORANGE -->
+            <div class="w-full bg-gray-800/80 rounded-full h-3 p-0.5 overflow-hidden border border-gray-700/60">
+              <div 
+                class="bg-gradient-to-r from-orange-600 to-amber-400 h-full rounded-full transition-all duration-500 shadow-sm shadow-orange-500/50 relative"
+                style="width: 50%;"
+              >
+                <div class="absolute inset-0 bg-white/10 rounded-full"></div>
+              </div>
+            </div>
+            <div class="flex justify-between items-center text-[10px] font-semibold text-gray-500 mt-1.5 px-0.5">
+              <span>Bitiş: 15 Aralık 2024</span>
+              <span class="text-orange-400 font-bold">%50 Süre Kaldı</span>
+            </div>
+          </div>
+
+          <!-- ITEM 3: Trafik Sigortası (SAFE - GREEN) -->
+          <div class="bg-[#0c121d] rounded-2xl p-3.5 border border-emerald-950/60 shadow-sm relative overflow-hidden group">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
+                  <i data-lucide="shield" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-sm font-bold text-white tracking-tight">Trafik Sigortası</span>
+                    <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 uppercase">
+                      Güvenli
+                    </span>
+                  </div>
+                  <span class="text-[11px] text-gray-400">Zorunlu Mali Sorumluluk</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="text-sm font-extrabold text-emerald-400 mono-num">128 gün</span>
+                <span class="block text-[10px] font-semibold text-gray-400">kaldı</span>
+              </div>
+            </div>
+
+            <!-- Health Bar / Progress Bar: Mostly empty / safe progress (22%) & GREEN -->
+            <div class="w-full bg-gray-800/80 rounded-full h-3 p-0.5 overflow-hidden border border-gray-700/60">
+              <div 
+                class="bg-gradient-to-r from-emerald-600 to-emerald-400 h-full rounded-full transition-all duration-500 shadow-sm shadow-emerald-500/50 relative"
+                style="width: 22%;"
+              >
+                <div class="absolute inset-0 bg-white/10 rounded-full"></div>
+              </div>
+            </div>
+            <div class="flex justify-between items-center text-[10px] font-semibold text-gray-500 mt-1.5 px-0.5">
+              <span>Bitiş: 28 Mart 2025</span>
+              <span class="text-emerald-400 font-bold">Rahat / Güvenli</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- SECTION 3: Action Button (Hızlı Güncelleme) -->
+        <div class="pt-2">
+          <button 
+            id="openUpdateKmModalBtn"
+            class="w-full py-3.5 px-4 rounded-2xl bg-gray-800 hover:bg-gray-750 active:scale-98 border border-gray-700/90 text-white font-bold text-sm tracking-wide shadow-md transition-all flex items-center justify-center gap-2 hover:border-gray-600 group"
+          >
+            <i data-lucide="refresh-cw" class="w-4 h-4 text-yellow-400 group-hover:rotate-180 transition-transform duration-500"></i>
+            <span>Kilometreyi Güncelle</span>
+          </button>
+        </div>
+
+      </section>
+
+      <!-- Extra Quick Vehicle Metrics Card for driver utility -->
+      <section class="grid grid-cols-2 gap-3">
+        <div class="bg-[#131b26] rounded-2xl p-3.5 border border-gray-800 flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center text-yellow-400 shrink-0">
+            <i data-lucide="fuel" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Yakıt Tipi</span>
+            <span class="text-xs font-black text-white">LPG + Benzin</span>
+          </div>
+        </div>
+
+        <div class="bg-[#131b26] rounded-2xl p-3.5 border border-gray-800 flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-sky-400/10 border border-sky-400/20 flex items-center justify-center text-sky-400 shrink-0">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Model Yılı</span>
+            <span class="text-xs font-black text-white">2006 (18 Yaş)</span>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- SECTION 4: Fixed Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0d131f]/95 border-t border-gray-800/90 backdrop-blur-xl px-4 py-2 z-30 flex items-center justify-between">
+      
+      <!-- 1. Ana Sayfa -->
+      <button class="flex flex-col items-center justify-center py-1 px-2.5 text-gray-400 hover:text-white transition group">
+        <i data-lucide="home" class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform"></i>
+        <span class="text-[10px] font-bold tracking-tight">Ana Sayfa</span>
+      </button>
+
+      <!-- 2. Analiz -->
+      <button class="flex flex-col items-center justify-center py-1 px-2.5 text-gray-400 hover:text-white transition group">
+        <i data-lucide="pie-chart" class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform"></i>
+        <span class="text-[10px] font-bold tracking-tight">Analiz</span>
+      </button>
+
+      <!-- 3. Big Central "+" Button -->
+      <div class="relative -top-4 flex items-center justify-center">
+        <button class="w-13 h-13 p-3.5 rounded-full bg-gradient-to-tr from-yellow-500 to-amber-300 text-gray-950 font-black shadow-lg shadow-yellow-500/30 border-4 border-[#0d131f] active:scale-90 hover:scale-105 transition-all flex items-center justify-center">
+          <i data-lucide="plus" class="w-6 h-6 stroke-[3]"></i>
+        </button>
+      </div>
+
+      <!-- 4. Araç (ACTIVE / YELLOW) -->
+      <button class="flex flex-col items-center justify-center py-1 px-2.5 text-yellow-400 relative group">
+        <div class="relative">
+          <i data-lucide="car" class="w-5 h-5 mb-1 stroke-[2.5]"></i>
+          <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-yellow-400"></span>
+        </div>
+        <span class="text-[10px] font-extrabold tracking-tight">Araç</span>
+      </button>
+
+      <!-- 5. Etkinlik -->
+      <button class="flex flex-col items-center justify-center py-1 px-2.5 text-gray-400 hover:text-white transition group">
+        <i data-lucide="calendar" class="w-5 h-5 mb-1 group-hover:scale-110 transition-transform"></i>
+        <span class="text-[10px] font-bold tracking-tight">Etkinlik</span>
+      </button>
+
+    </nav>
+
+    <!-- Modal: Kilometre Güncelleme (Interactive Demo) -->
+    <div id="kmModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+      <div class="w-full max-w-sm bg-[#131b26] border border-gray-800 rounded-3xl p-6 shadow-2xl relative text-left">
+        <button id="closeKmModalBtn" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-white rounded-full bg-gray-800/80">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-11 h-11 rounded-2xl bg-yellow-400/10 border border-yellow-400/30 flex items-center justify-center text-yellow-400">
+            <i data-lucide="gauge" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white">Kilometreyi Güncelle</h3>
+            <p class="text-xs text-gray-400">Araç sayacındaki güncel KM'yi girin</p>
+          </div>
+        </div>
+
+        <form id="kmUpdateForm" onsubmit="event.preventDefault(); saveNewKm();" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5">
+              Güncel Sayaç Değeri (KM)
+            </label>
+            <div class="relative">
+              <input 
+                id="newKmInput" 
+                type="number" 
+                value="148500" 
+                class="w-full px-4 py-3.5 rounded-xl bg-gray-900 border border-gray-700 text-white font-mono font-bold text-xl focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
+              />
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">KM</span>
+            </div>
+            <p class="text-[11px] text-gray-400 mt-1.5">Önceki kayıt: 148.500 km</p>
+          </div>
+
+          <div class="flex gap-2.5 pt-2">
+            <button 
+              type="button" 
+              id="cancelKmModalBtn" 
+              class="w-1/2 py-3 rounded-xl bg-gray-800 text-gray-300 font-bold text-xs uppercase tracking-wider hover:bg-gray-700 transition"
+            >
+              Vazgeç
+            </button>
+            <button 
+              type="submit" 
+              class="w-1/2 py-3 rounded-xl bg-yellow-400 text-gray-950 font-black text-xs uppercase tracking-wider hover:bg-yellow-300 transition shadow-lg shadow-yellow-400/20"
+            >
+              Kaydet
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Toast Notification for feedback -->
+    <div id="toast" class="hidden fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 px-4 py-3 bg-gray-800 border border-yellow-400/40 text-yellow-300 rounded-2xl shadow-2xl backdrop-blur-md">
+      <i data-lucide="check-circle" class="w-4 h-4 text-yellow-400"></i>
+      <span id="toastText" class="text-xs font-bold text-white">Kilometre başarıyla güncellendi!</span>
+    </div>
+
+  </main>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Modal interaction logic
+    const modal = document.getElementById('kmModal');
+    const openBtn1 = document.getElementById('quickKmModalBtn');
+    const openBtn2 = document.getElementById('openUpdateKmModalBtn');
+    const closeBtn = document.getElementById('closeKmModalBtn');
+    const cancelBtn = document.getElementById('cancelKmModalBtn');
+    const toast = document.getElementById('toast');
+
+    function openModal() {
+      modal.classList.remove('hidden');
+    }
+    function closeModal() {
+      modal.classList.add('hidden');
+    }
+
+    openBtn1.addEventListener('click', openModal);
+    openBtn2.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+
+    function saveNewKm() {
+      const val = document.getElementById('newKmInput').value;
+      if (val) {
+        closeModal();
+        toast.classList.remove('hidden');
+        setTimeout(() => {
+          toast.classList.add('hidden');
+        }, 2500);
+      }
+    }
+  </script>
+</body>
+</html>

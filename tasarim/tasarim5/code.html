@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Taksi Cepte</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            taxi: {
+              400: '#FACC15',
+              500: '#EAB308',
+              600: '#CA8A04',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .pulse-btn {
+      box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      animation: pulseGreen 2s infinite;
+    }
+    @keyframes pulseGreen {
+      0% {
+        transform: scale(0.98);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+      }
+      70% {
+        transform: scale(1.02);
+        box-shadow: 0 0 0 20px rgba(34, 197, 94, 0);
+      }
+      100% {
+        transform: scale(0.98);
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+      }
+    }
+    /* Hide scrollbars */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 flex justify-center min-h-screen">
+  <div id="root" class="w-full max-w-md bg-gray-900 min-h-screen relative flex flex-col shadow-2xl border-x border-gray-800"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function App() {
+      // Navigation state: 'home', 'analytics', 'entry', 'vehicle', 'activity'
+      const [currentTab, setCurrentTab] = useState('home');
+      
+      // Core shift state
+      const [isShiftActive, setIsShiftActive] = useState(false);
+      const [showEndShiftModal, setShowEndShiftModal] = useState(false);
+      
+      // End Shift Modal inputs
+      const [shiftKm, setShiftKm] = useState('');
+      const [shiftFuel, setShiftFuel] = useState('');
+
+      // Quick Entry state
+      const [entryType, setEntryType] = useState('income'); // 'income' (Gelir) or 'expense' (Gider)
+      const [amountStr, setAmountStr] = useState('0');
+      const [selectedCategory, setSelectedCategory] = useState('Nakit');
+
+      // Transactions state
+      const [transactions, setTransactions] = useState([
+        { id: 1, title: '1. Yolculuk', amount: 750, type: 'income', method: 'Nakit', time: '14:20' },
+        { id: 2, title: '2. Yolculuk', amount: 420, type: 'income', method: 'POS', time: '15:05' },
+        { id: 3, title: '3. Yolculuk', amount: 1100, type: 'income', method: 'Uygulamalar', time: '16:40' },
+        { id: 4, title: 'Öğle Yemeği', amount: 180, type: 'expense', method: 'Yemek', time: '13:10' },
+        { id: 5, title: 'Mazot Dolumu', amount: 240, type: 'expense', method: 'Yakıt', time: '11:30' }
+      ]);
+
+      // Category change on type toggle
+      useEffect(() => {
+        if (entryType === 'income') {
+          setSelectedCategory('Nakit');
+        } else {
+          setSelectedCategory('Yakıt');
+        }
+      }, [entryType]);
+
+      // Handle Central '+' button click
+      const handleCenterButtonClick = () => {
+        setCurrentTab('entry');
+      };
+
+      // Numpad input handler
+      const handleNumpad = (val) => {
+        if (val === 'back') {
+          if (amountStr.length <= 1) {
+            setAmountStr('0');
+          } else {
+            setAmountStr(amountStr.slice(0, -1));
+          }
+        } else if (val === 'clear') {
+          setAmountStr('0');
+        } else {
+          if (amountStr === '0') {
+            setAmountStr(val.toString());
+          } else if (amountStr.length < 7) {
+            setAmountStr(amountStr + val.toString());
+          }
+        }
+      };
+
+      // Save Transaction
+      const handleSaveTransaction = () => {
+        const amt = parseInt(amountStr, 10);
+        if (isNaN(amt) || amt <= 0) return;
+
+        const newTx = {
+          id: Date.now(),
+          title: entryType === 'income' ? `${transactions.filter(t => t.type==='income').length + 1}. Yolculuk` : selectedCategory,
+          amount: amt,
+          type: entryType,
+          method: selectedCategory,
+          time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })
+        };
+
+        setTransactions([newTx, ...transactions]);
+        setAmountStr('0');
+        setCurrentTab('home');
+      };
+
+      // Calculate totals
+      const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, c) => acc + c.amount, 0);
+      const totalExpense = transactions.filter(t => t.type === 'expense').reduce((acc, c) => acc + c.amount, 0);
+      const netProfit = totalIncome - totalExpense;
+
+      // Start Shift
+      const handleStartShift = () => {
+        setIsShiftActive(true);
+      };
+
+      // End Shift Complete
+      const handleConfirmEndShift = (e) => {
+        e.preventDefault();
+        setIsShiftActive(false);
+        setShowEndShiftModal(false);
+        setShiftKm('');
+        setShiftFuel('');
+        setCurrentTab('home');
+      };
+
+      return (
+        <div class="flex flex-col min-h-screen pb-24 text-gray-100 select-none">
+          {/* Top Status Bar Simulator */}
+          <div class="px-6 pt-3 pb-1 flex justify-between items-center text-xs text-gray-400">
+            <span>09:41</span>
+            <div class="flex items-center gap-1.5">
+              <i class="fa-solid fa-signal"></i>
+              <i class="fa-solid fa-wifi"></i>
+              <i class="fa-solid fa-battery-full text-yellow-400"></i>
+            </div>
+          </div>
+
+          {/* SCREEN 1: DASHBOARD (ANA SAYFA) */}
+          {currentTab === 'home' && (
+            <div class="flex-1 px-5 pt-3 animate-fade-in flex flex-col">
+              {/* Header */}
+              <div class="flex justify-between items-center mb-5">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class={`inline-block w-2.5 h-2.5 rounded-full ${isShiftActive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
+                    <span class="text-xs uppercase font-semibold tracking-wider text-gray-400">
+                      {isShiftActive ? 'Vardiya Aktif' : 'Vardiya Kapalı'}
+                    </span>
+                  </div>
+                  <h1 class="text-2xl font-bold tracking-tight text-white mt-0.5">İyi Vardiyalar!</h1>
+                </div>
+                <div class="relative">
+                  <button class="w-10 h-10 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-gray-300 hover:text-yellow-400 transition">
+                    <i class="fa-regular fa-bell text-lg"></i>
+                  </button>
+                  <span class="absolute top-1 right-1 w-2.5 h-2.5 bg-yellow-400 rounded-full"></span>
+                </div>
+              </div>
+
+              {/* Shift Inactive Blur / Empty State overlay if !isShiftActive */}
+              {!isShiftActive ? (
+                <div class="my-auto py-12 px-6 rounded-3xl bg-gray-800/40 border border-gray-800/80 backdrop-blur-md flex flex-col items-center text-center">
+                  <div class="w-20 h-20 rounded-full bg-yellow-400/10 border-2 border-yellow-400/30 flex items-center justify-center mb-4 text-yellow-400">
+                    <i class="fa-solid fa-taxi text-3xl"></i>
+                  </div>
+                  <h3 class="text-xl font-bold text-white mb-2">Sürüşe başlamadınız.</h3>
+                  <p class="text-sm text-gray-400 mb-6 max-w-xs">
+                    Bugünkü kazanç, harcamalar ve sefer listesini kaydetmek için vardiyanızı başlatın.
+                  </p>
+                  <button 
+                    onClick={() => { setCurrentTab('entry'); }}
+                    class="px-6 py-3.5 bg-yellow-400 hover:bg-yellow-500 active:scale-95 text-gray-950 font-bold rounded-2xl shadow-lg shadow-yellow-400/20 flex items-center gap-2 transition"
+                  >
+                    <i class="fa-solid fa-play text-sm"></i>
+                    Vardiya Başlatmak İçin Dokun
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* Hero Section: Large circular progress indicator */}
+                  <div class="bg-gray-800/60 border border-gray-800 rounded-3xl p-5 mb-5 flex flex-col items-center justify-center relative overflow-hidden shadow-lg">
+                    <div class="absolute -top-12 -right-12 w-40 h-40 bg-yellow-400/5 rounded-full blur-2xl"></div>
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Bugünkü Ciro</span>
+                    
+                    {/* Circular Progress Gauge */}
+                    <div class="relative w-44 h-44 flex items-center justify-center">
+                      <svg class="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
+                        {/* Background track */}
+                        <circle cx="60" cy="60" r="50" stroke="#1f2937" stroke-width="10" fill="transparent" />
+                        {/* Yellow progress track */}
+                        <circle 
+                          cx="60" cy="60" r="50" 
+                          stroke="#FACC15" 
+                          stroke-width="10" 
+                          stroke-dasharray="314.15" 
+                          stroke-dashoffset="80" 
+                          stroke-linecap="round" 
+                          fill="transparent" 
+                          class="transition-all duration-1000 ease-out"
+                        />
+                      </svg>
+                      <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span class="text-3xl font-black text-white tracking-tight">₺{totalIncome.toLocaleString('tr-TR')}</span>
+                        <span class="text-[11px] font-medium text-yellow-400 mt-0.5">Hedef: ₺3.500 (%65)</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Summary Row */}
+                  <div class="grid grid-cols-2 gap-3 mb-5">
+                    {/* Giderler */}
+                    <div class="bg-gray-800/60 border border-gray-800 rounded-2xl p-4 flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500 flex-shrink-0">
+                        <i class="fa-solid fa-arrow-trend-down"></i>
+                      </div>
+                      <div>
+                        <div class="text-[11px] text-gray-400 font-medium">Giderler</div>
+                        <div class="text-base font-bold text-red-400">-{totalExpense.toLocaleString('tr-TR')} ₺</div>
+                      </div>
+                    </div>
+
+                    {/* Net Kâr */}
+                    <div class="bg-gray-800/60 border border-gray-800 rounded-2xl p-4 flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-xl bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-500 flex-shrink-0">
+                        <i class="fa-solid fa-wallet"></i>
+                      </div>
+                      <div>
+                        <div class="text-[11px] text-gray-400 font-medium">Net Kâr</div>
+                        <div class="text-base font-bold text-green-400">{netProfit.toLocaleString('tr-TR')} ₺</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Recent Transactions List */}
+                  <div class="flex-1 flex flex-col">
+                    <div class="flex justify-between items-center mb-3">
+                      <h3 class="text-sm font-bold text-gray-200">Son İşlemler</h3>
+                      <span class="text-xs text-yellow-400 font-semibold cursor-pointer">Tümü ({transactions.length})</span>
+                    </div>
+
+                    <div class="space-y-2.5 overflow-y-auto max-h-56 pr-1">
+                      {transactions.map((tx) => (
+                        <div key={tx.id} class="bg-gray-800/40 border border-gray-800 hover:border-gray-700 rounded-xl p-3 flex justify-between items-center transition">
+                          <div class="flex items-center gap-3">
+                            <div class={`w-9 h-9 rounded-lg flex items-center justify-center text-sm ${
+                              tx.type === 'income' 
+                                ? 'bg-yellow-400/10 text-yellow-400 border border-yellow-400/20' 
+                                : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                            }`}>
+                              <i class={tx.type === 'income' ? 'fa-solid fa-taxi' : 'fa-solid fa-gas-pump'}></i>
+                            </div>
+                            <div>
+                              <div class="text-sm font-semibold text-white">{tx.title}</div>
+                              <div class="text-[11px] text-gray-400 flex items-center gap-1.5">
+                                <span class="bg-gray-800 px-1.5 py-0.5 rounded text-gray-300 font-medium">{tx.method}</span>
+                                <span>{tx.time}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div class={`text-sm font-bold ${tx.type === 'income' ? 'text-white' : 'text-red-400'}`}>
+                            {tx.type === 'income' ? '+' : '-'}{tx.amount} ₺
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* SCREEN 2: QUICK ENTRY & SHIFT MANAGEMENT (Triggered by '+') */}
+          {currentTab === 'entry' && (
+            <div class="flex-1 px-5 pt-3 flex flex-col animate-fade-in">
+              {/* SCENARIO A: isShiftActive === false */}
+              {!isShiftActive ? (
+                <div class="flex-1 flex flex-col items-center justify-center text-center px-4">
+                  <div class="w-24 h-24 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center mb-6 text-emerald-400">
+                    <i class="fa-solid fa-key text-4xl"></i>
+                  </div>
+                  <h2 class="text-2xl font-black text-white mb-2">Vardiyanız Başlamadı</h2>
+                  <p class="text-sm text-gray-400 mb-10 max-w-xs">
+                    Kasa takibi, yolculuk kaydı ve gelir/gider eklemek için önce kontağı açın ve sürüşü başlatın.
+                  </p>
+                  
+                  {/* Pulsating Green Button */}
+                  <button
+                    onClick={handleStartShift}
+                    class="pulse-btn w-full py-5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-gray-950 font-black text-xl tracking-wider shadow-2xl flex items-center justify-center gap-3 transition-transform"
+                  >
+                    <i class="fa-solid fa-play text-2xl"></i>
+                    ▶ SÜRÜŞÜ BAŞLAT
+                  </button>
+                </div>
+              ) : (
+                /* SCENARIO B: isShiftActive === true */
+                <div class="flex-1 flex flex-col">
+                  {/* Top Bar with "SÜRÜŞÜ BİTİR" Button */}
+                  <div class="flex justify-between items-center mb-4">
+                    <button 
+                      onClick={() => setCurrentTab('home')}
+                      class="text-gray-400 hover:text-white p-2 text-sm flex items-center gap-1 font-medium"
+                    >
+                      <i class="fa-solid fa-arrow-left"></i> Vazgeç
+                    </button>
+                    {/* End Shift Red Outline Button */}
+                    <button
+                      onClick={() => setShowEndShiftModal(true)}
+                      class="border-2 border-red-500/80 text-red-400 hover:bg-red-500/10 active:scale-95 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition"
+                    >
+                      <i class="fa-solid fa-stop text-xs text-red-500"></i>
+                      ⏹ SÜRÜŞÜ BİTİR
+                    </button>
+                  </div>
+
+                  {/* Toggle: "Gelir" and "Gider" */}
+                  <div class="grid grid-cols-2 bg-gray-800 p-1 rounded-2xl border border-gray-700/80 mb-4">
+                    <button
+                      onClick={() => setEntryType('income')}
+                      class={`py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition ${
+                        entryType === 'income'
+                          ? 'bg-yellow-400 text-gray-950 shadow-md'
+                          : 'text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      <i class="fa-solid fa-circle-plus"></i> Gelir
+                    </button>
+                    <button
+                      onClick={() => setEntryType('expense')}
+                      class={`py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition ${
+                        entryType === 'expense'
+                          ? 'bg-red-500 text-white shadow-md'
+                          : 'text-gray-400 hover:text-white'
+                      }`}
+                    >
+                      <i class="fa-solid fa-circle-minus"></i> Gider
+                    </button>
+                  </div>
+
+                  {/* Massive Amount Display */}
+                  <div class="bg-gray-800/40 border border-gray-800 rounded-2xl py-3 px-4 text-center mb-4">
+                    <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-widest mb-1">
+                      {entryType === 'income' ? 'Alınan Tutar' : 'Harcama Tutarı'}
+                    </div>
+                    <div class="text-4xl font-black text-white tracking-tight flex items-center justify-center gap-1">
+                      <span class="text-yellow-400">₺</span>
+                      <span>{amountStr}</span>
+                    </div>
+                  </div>
+
+                  {/* Category Selectors: 3 big square buttons */}
+                  <div class="grid grid-cols-3 gap-2.5 mb-4">
+                    {(entryType === 'income' 
+                      ? [
+                          { label: 'Nakit', icon: 'fa-money-bill-wave' },
+                          { label: 'POS', icon: 'fa-credit-card' },
+                          { label: 'Uygulamalar', icon: 'fa-mobile-screen-button' }
+                        ]
+                      : [
+                          { label: 'Yemek', icon: 'fa-burger' },
+                          { label: 'Yakıt', icon: 'fa-gas-pump' },
+                          { label: 'Yıkama', icon: 'fa-soap' }
+                        ]
+                    ).map((cat) => {
+                      const isActive = selectedCategory === cat.label;
+                      return (
+                        <button
+                          key={cat.label}
+                          onClick={() => setSelectedCategory(cat.label)}
+                          class={`py-3 px-2 rounded-2xl border flex flex-col items-center justify-center gap-1.5 transition active:scale-95 ${
+                            isActive
+                              ? 'bg-yellow-400/15 border-yellow-400 text-yellow-400 font-bold'
+                              : 'bg-gray-800/70 border-gray-700/60 text-gray-300 hover:border-gray-600'
+                          }`}
+                        >
+                          <i class={`fa-solid ${cat.icon} text-lg`}></i>
+                          <span class="text-xs truncate w-full text-center">{cat.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Custom Numpad: 3x4 numerical grid (1-9, C, 0, back) */}
+                  <div class="grid grid-cols-3 gap-2 mb-4 flex-1 content-center">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+                      <button
+                        key={n}
+                        onClick={() => handleNumpad(n)}
+                        class="h-12 bg-gray-800/80 hover:bg-gray-700/80 active:bg-gray-600 rounded-xl text-xl font-bold text-white flex items-center justify-center border border-gray-700/50 transition active:scale-95 shadow-sm"
+                      >
+                        {n}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => handleNumpad('clear')}
+                      class="h-12 bg-gray-800/40 hover:bg-gray-700 text-gray-400 hover:text-white rounded-xl text-sm font-bold flex items-center justify-center border border-gray-700/40 transition active:scale-95"
+                    >
+                      TEMİZLE
+                    </button>
+                    <button
+                      onClick={() => handleNumpad(0)}
+                      class="h-12 bg-gray-800/80 hover:bg-gray-700/80 active:bg-gray-600 rounded-xl text-xl font-bold text-white flex items-center justify-center border border-gray-700/50 transition active:scale-95 shadow-sm"
+                    >
+                      0
+                    </button>
+                    <button
+                      onClick={() => handleNumpad('back')}
+                      class="h-12 bg-gray-800/80 hover:bg-gray-700/80 active:bg-gray-600 rounded-xl text-lg text-yellow-400 flex items-center justify-center border border-gray-700/50 transition active:scale-95 shadow-sm"
+                    >
+                      <i class="fa-solid fa-delete-left"></i>
+                    </button>
+                  </div>
+
+                  {/* Save Button: Massive Yellow "KAYDET" button */}
+                  <button
+                    onClick={handleSaveTransaction}
+                    class="w-full py-4 bg-yellow-400 hover:bg-yellow-500 active:scale-98 text-gray-950 font-black text-lg tracking-wider rounded-2xl shadow-xl shadow-yellow-400/20 flex items-center justify-center gap-2 transition"
+                  >
+                    <i class="fa-solid fa-check text-xl"></i>
+                    KAYDET
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* SCREEN 4: ANALYTICS (ANALİZ) */}
+          {currentTab === 'analytics' && (
+            <div class="flex-1 px-5 pt-3 flex flex-col animate-fade-in">
+              <h2 class="text-xl font-bold text-white mb-4">Finansal Analiz</h2>
+
+              {/* Top Toggle: Günlük, Haftalık, Aylık */}
+              <div class="grid grid-cols-3 bg-gray-800 p-1 rounded-2xl border border-gray-700/80 mb-5">
+                {['Günlük', 'Haftalık', 'Aylık'].map((period, idx) => (
+                  <button
+                    key={period}
+                    class={`py-2 rounded-xl text-xs font-bold transition ${
+                      idx === 0 
+                        ? 'bg-yellow-400 text-gray-950 shadow-md' 
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    {period}
+                  </button>
+                ))}
+              </div>
+
+              {/* Metrics Cards */}
+              <div class="grid grid-cols-3 gap-2.5 mb-5">
+                <div class="bg-gray-800/60 border border-gray-800 rounded-2xl p-3 flex flex-col justify-between">
+                  <span class="text-[10px] text-gray-400 font-semibold leading-tight">Net Kâr</span>
+                  <span class="text-base font-extrabold text-green-400 mt-1">1.850 ₺</span>
+                  <span class="text-[9px] text-green-500/80 font-medium">+%12 düne göre</span>
+                </div>
+                <div class="bg-gray-800/60 border border-gray-800 rounded-2xl p-3 flex flex-col justify-between">
+                  <span class="text-[10px] text-gray-400 font-semibold leading-tight">Toplam Ciro</span>
+                  <span class="text-base font-extrabold text-white mt-1">2.270 ₺</span>
+                  <span class="text-[9px] text-yellow-400 font-medium">9 Yolculuk</span>
+                </div>
+                <div class="bg-gray-800/60 border border-gray-800 rounded-2xl p-3 flex flex-col justify-between">
+                  <span class="text-[10px] text-gray-400 font-semibold leading-tight">Toplam Gider</span>
+                  <span class="text-base font-extrabold text-red-400 mt-1">420 ₺</span>
+                  <span class="text-[9px] text-gray-400 font-medium">Yakıt & Yemek</span>
+                </div>
+              </div>
+
+              {/* Charts Section */}
+              <div class="space-y-4 flex-1 overflow-y-auto">
+                {/* Bar Chart Placeholder: Saatlik Performans */}
+                <div class="bg-gray-800/40 border border-gray-800 rounded-2xl p-4">
+                  <div class="flex justify-between items-center mb-3">
+                    <span class="text-xs font-bold text-gray-300">Saatlik Ciro Dağılımı (₺)</span>
+                    <span class="text-[10px] text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded font-semibold">En yoğun: 14:00 - 18:00</span>
+                  </div>
+                  <div class="h-28 flex items-end justify-between gap-2 pt-4 px-1 border-b border-gray-700/60 pb-2">
+                    {[
+                      { h: '30%', label: '08:00', val: '240' },
+                      { h: '55%', label: '11:00', val: '450' },
+                      { h: '85%', label: '14:00', val: '750' },
+                      { h: '45%', label: '17:00', val: '420' },
+                      { h: '95%', label: '20:00', val: '860' },
+                      { h: '40%', label: '23:00', val: '310' },
+                    ].map((bar, i) => (
+                      <div key={i} class="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                        <div 
+                          style={{ height: bar.h }} 
+                          class="w-full bg-gradient-to-t from-yellow-500 to-yellow-300 rounded-t-md hover:brightness-110 transition relative"
+                        ></div>
+                        <span class="text-[9px] text-gray-400">{bar.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Donut Chart Placeholder: Gider Dağılımı */}
+                <div class="bg-gray-800/40 border border-gray-800 rounded-2xl p-4">
+                  <span class="text-xs font-bold text-gray-300 block mb-3">Gider Dağılımı</span>
+                  <div class="flex items-center gap-4">
+                    {/* CSS Donut representation */}
+                    <div class="relative w-24 h-24 flex-shrink-0">
+                      <div class="w-full h-full rounded-full" style={{
+                        background: 'conic-gradient(#ef4444 0% 60%, #eab308 60% 85%, #3b82f6 85% 100%)'
+                      }}></div>
+                      <div class="absolute inset-2 bg-gray-900 rounded-full flex flex-col items-center justify-center">
+                        <span class="text-xs font-bold text-white">420 ₺</span>
+                        <span class="text-[8px] text-gray-400">Toplam</span>
+                      </div>
+                    </div>
+                    {/* Legend */}
+                    <div class="space-y-1.5 flex-1 text-xs">
+                      <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-1.5">
+                          <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                          <span class="text-gray-300">Yakıt (%60)</span>
+                        </div>
+                        <span class="font-bold text-gray-200">252 ₺</span>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-1.5">
+                          <span class="w-2.5 h-2.5 rounded-full bg-yellow-500"></span>
+                          <span class="text-gray-300">Yemek (%25)</span>
+                        </div>
+                        <span class="font-bold text-gray-200">105 ₺</span>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-1.5">
+                          <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                          <span class="text-gray-300">Yıkama & Diğer (%15)</span>
+                        </div>
+                        <span class="font-bold text-gray-200">63 ₺</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SCREEN 5: VEHICLE & MAINTENANCE (ARAÇ) */}
+          {currentTab === 'vehicle' && (
+            <div class="flex-1 px-5 pt-3 flex flex-col animate-fade-in overflow-y-auto">
+              <h2 class="text-xl font-bold text-white mb-4">Araç & Bakım Durumu</h2>
+
+              {/* Vehicle ID Card */}
+              <div class="bg-gradient-to-br from-gray-800 to-gray-800/60 border border-gray-700/80 rounded-3xl p-5 mb-5 relative overflow-hidden shadow-lg">
+                <div class="absolute top-3 right-4 opacity-15">
+                  <i class="fa-solid fa-taxi text-6xl text-yellow-400"></i>
+                </div>
+                <div class="flex items-center gap-3 mb-2">
+                  <div class="bg-yellow-400 text-gray-950 px-3 py-1 rounded-lg font-black text-sm tracking-wider border-2 border-yellow-500 shadow-sm">
+                    TR | 06 T 1234
+                  </div>
+                  <span class="bg-gray-700/60 text-gray-300 text-xs px-2.5 py-1 rounded-md font-medium">Fiat Egea 1.3 MJet</span>
+                </div>
+                <div class="text-3xl font-black text-white tracking-tight mt-2">148.500 km</div>
+                <div class="text-xs text-gray-400 mt-1 flex items-center gap-1.5">
+                  <i class="fa-solid fa-location-dot text-yellow-400"></i>
+                  <span>Ankara Merkez Plaka</span>
+                </div>
+              </div>
+
+              {/* Maintenance Progress Bars (3 items) */}
+              <div class="bg-gray-800/40 border border-gray-800 rounded-2xl p-4 mb-4">
+                <h3 class="text-sm font-bold text-gray-200 mb-3.5 flex items-center gap-2">
+                  <i class="fa-solid fa-wrench text-yellow-400"></i> Periyodik Bakım Durumu
+                </h3>
+
+                <div class="space-y-4">
+                  {/* Motor Yağı & Filtre (Red / Urgent) */}
+                  <div>
+                    <div class="flex justify-between items-center text-xs mb-1.5">
+                      <span class="font-medium text-gray-300">Motor Yağı & Filtre</span>
+                      <span class="font-bold text-red-400">Son 500 KM (Acil)</span>
+                    </div>
+                    <div class="w-full bg-gray-700 h-2.5 rounded-full overflow-hidden">
+                      <div class="bg-red-500 h-full rounded-full w-[92%]"></div>
+                    </div>
+                  </div>
+
+                  {/* Muayene (Orange / Moderate) */}
+                  <div>
+                    <div class="flex justify-between items-center text-xs mb-1.5">
+                      <span class="font-medium text-gray-300">TÜVTÜRK Muayene</span>
+                      <span class="font-bold text-orange-400">42 Gün Kaldı</span>
+                    </div>
+                    <div class="w-full bg-gray-700 h-2.5 rounded-full overflow-hidden">
+                      <div class="bg-amber-500 h-full rounded-full w-[65%]"></div>
+                    </div>
+                  </div>
+
+                  {/* Trafik Sigortası (Green / Good) */}
+                  <div>
+                    <div class="flex justify-between items-center text-xs mb-1.5">
+                      <span class="font-medium text-gray-300">Trafik Sigortası & Kasko</span>
+                      <span class="font-bold text-emerald-400">184 Gün Kaldı</span>
+                    </div>
+                    <div class="w-full bg-gray-700 h-2.5 rounded-full overflow-hidden">
+                      <div class="bg-emerald-500 h-full rounded-full w-[30%]"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Efficiency Cards */}
+              <div class="grid grid-cols-2 gap-3 mb-2">
+                <div class="bg-gray-800/60 border border-gray-800 rounded-2xl p-4">
+                  <div class="w-8 h-8 rounded-lg bg-yellow-400/10 text-yellow-400 flex items-center justify-center text-sm mb-2">
+                    <i class="fa-solid fa-gas-pump"></i>
+                  </div>
+                  <div class="text-[11px] text-gray-400 font-medium">Ortalama Yakıt</div>
+                  <div class="text-lg font-black text-white mt-0.5">6.8 L<span class="text-xs text-gray-400 font-normal">/100km</span></div>
+                  <span class="text-[9px] text-green-400 font-medium">Şehir içi verimli</span>
+                </div>
+
+                <div class="bg-gray-800/60 border border-gray-800 rounded-2xl p-4">
+                  <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm mb-2">
+                    <i class="fa-solid fa-coins"></i>
+                  </div>
+                  <div class="text-[11px] text-gray-400 font-medium">KM Başına Maliyet</div>
+                  <div class="text-lg font-black text-white mt-0.5">3.10 ₺<span class="text-xs text-gray-400 font-normal">/km</span></div>
+                  <span class="text-[9px] text-yellow-400 font-medium">Mazot + Bakım dahil</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SCREEN: ETKİNLİK (Taksi Durak / Çevresel Etkinlikler) */}
+          {currentTab === 'activity' && (
+            <div class="flex-1 px-5 pt-3 flex flex-col animate-fade-in overflow-y-auto">
+              <h2 class="text-xl font-bold text-white mb-2">Etkinlik & Şehir Trafiği</h2>
+              <p class="text-xs text-gray-400 mb-4">Müşteri potansiyeli yüksek etkinlikler ve durak bildirimleri</p>
+
+              <div class="space-y-3">
+                <div class="bg-gray-800/60 border border-gray-800 rounded-2xl p-4">
+                  <div class="flex justify-between items-start mb-2">
+                    <span class="bg-yellow-400/20 text-yellow-400 font-bold text-[10px] px-2 py-0.5 rounded-full">Konser - 21:00</span>
+                    <span class="text-xs font-semibold text-emerald-400">Yüksek Talep 🔥</span>
+                  </div>
+                  <h4 class="font-bold text-white text-sm">Harbiye Cemil Topuzlu</h4>
+                  <p class="text-xs text-gray-400 mt-1">Konser çıkışında Şişli & Beşiktaş yönünde yoğun yolcu bekleniyor.</p>
+                </div>
+
+                <div class="bg-gray-800/60 border border-gray-800 rounded-2xl p-4">
+                  <div class="flex justify-between items-start mb-2">
+                    <span class="bg-blue-500/20 text-blue-400 font-bold text-[10px] px-2 py-0.5 rounded-full">Süper Lig - 19:00</span>
+                    <span class="text-xs font-semibold text-yellow-400">Orta Talep</span>
+                  </div>
+                  <h4 class="font-bold text-white text-sm">Rams Park Stadı</h4>
+                  <p class="text-xs text-gray-400 mt-1">Seyrantepe Metro civarı maç öncesi yol kapamaları olabilir.</p>
+                </div>
+
+                <div class="bg-gray-800/60 border border-gray-800 rounded-2xl p-4">
+                  <div class="flex justify-between items-start mb-2">
+                    <span class="bg-purple-500/20 text-purple-400 font-bold text-[10px] px-2 py-0.5 rounded-full">Fuar</span>
+                    <span class="text-xs font-semibold text-gray-300">CNR Expo</span>
+                  </div>
+                  <h4 class="font-bold text-white text-sm">Uluslararası Otomotiv Zirvesi</h4>
+                  <p class="text-xs text-gray-400 mt-1">Havalimanı transfer talepleri artışta.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SCREEN 3: END SHIFT MODAL (Triggered by "SÜRÜŞÜ BİTİR") */}
+          {showEndShiftModal && (
+            <div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 animate-fade-in">
+              <div class="w-full max-w-sm bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-2xl relative">
+                <div class="w-12 h-1.5 bg-gray-700 rounded-full mx-auto mb-4 sm:hidden"></div>
+                
+                <div class="flex items-center gap-3 mb-4">
+                  <div class="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-500">
+                    <i class="fa-solid fa-flag-checkered text-lg"></i>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-bold text-white">Vardiya Sonu Kapanış</h3>
+                    <p class="text-xs text-gray-400">Günü raporlayıp vardiyayı sonlandırın</p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleConfirmEndShift} class="space-y-4">
+                  {/* Input 1: KM */}
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">
+                      Bugün toplam kaç KM yaptınız?
+                    </label>
+                    <div class="relative">
+                      <input 
+                        type="number"
+                        placeholder="Örn: 245"
+                        required
+                        value={shiftKm}
+                        onChange={(e) => setShiftKm(e.target.value)}
+                        class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-yellow-400 transition"
+                      />
+                      <span class="absolute right-4 top-3 text-xs text-gray-400 font-semibold">KM</span>
+                    </div>
+                  </div>
+
+                  {/* Input 2: Fuel */}
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">
+                      Toplam ne kadarlık yakıt aldınız? (₺)
+                    </label>
+                    <div class="relative">
+                      <input 
+                        type="number"
+                        placeholder="Örn: 650"
+                        required
+                        value={shiftFuel}
+                        onChange={(e) => setShiftFuel(e.target.value)}
+                        class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-yellow-400 transition"
+                      />
+                      <span class="absolute right-4 top-3 text-xs text-yellow-400 font-semibold">₺</span>
+                    </div>
+                  </div>
+
+                  <div class="pt-2 flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowEndShiftModal(false)}
+                      class="flex-1 py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 font-bold rounded-xl text-sm transition"
+                    >
+                      İptal
+                    </button>
+                    {/* Submit Button */}
+                    <button
+                      type="submit"
+                      class="flex-1 py-3 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-bold rounded-xl text-sm shadow-lg shadow-red-600/30 transition"
+                    >
+                      Vardiyayı Kapat
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* FIXED BOTTOM NAVIGATION BAR WITH 5 ITEMS */}
+          <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-gray-900/95 backdrop-blur-lg border-t border-gray-800/90 px-3 py-2 z-40 flex items-center justify-between">
+            {/* 1. Ana Sayfa */}
+            <button
+              onClick={() => setCurrentTab('home')}
+              class={`flex flex-col items-center justify-center w-14 py-1 transition ${
+                currentTab === 'home' ? 'text-yellow-400' : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <i class="fa-solid fa-house text-lg mb-0.5"></i>
+              <span class="text-[10px] font-semibold">Ana Sayfa</span>
+            </button>
+
+            {/* 2. Analiz */}
+            <button
+              onClick={() => setCurrentTab('analytics')}
+              class={`flex flex-col items-center justify-center w-14 py-1 transition ${
+                currentTab === 'analytics' ? 'text-yellow-400' : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <i class="fa-solid fa-chart-pie text-lg mb-0.5"></i>
+              <span class="text-[10px] font-semibold">Analiz</span>
+            </button>
+
+            {/* 3. Central Massive Floating "+" Button */}
+            <div class="relative -top-5 flex justify-center">
+              <button
+                onClick={handleCenterButtonClick}
+                class={`w-14 h-14 rounded-full flex items-center justify-center text-gray-950 font-black text-2xl shadow-xl transition-transform active:scale-90 border-4 border-gray-900 ${
+                  currentTab === 'entry'
+                    ? 'bg-yellow-300 ring-4 ring-yellow-400/30'
+                    : isShiftActive
+                    ? 'bg-yellow-400 hover:bg-yellow-500 shadow-yellow-400/30'
+                    : 'bg-emerald-500 text-white shadow-emerald-500/30'
+                }`}
+                title="Hızlı Giriş / Vardiya"
+              >
+                <i class={`fa-solid ${!isShiftActive ? 'fa-play text-lg ml-0.5' : currentTab === 'entry' ? 'fa-pen' : 'fa-plus'}`}></i>
+              </button>
+            </div>
+
+            {/* 4. Araç */}
+            <button
+              onClick={() => setCurrentTab('vehicle')}
+              class={`flex flex-col items-center justify-center w-14 py-1 transition ${
+                currentTab === 'vehicle' ? 'text-yellow-400' : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <i class="fa-solid fa-taxi text-lg mb-0.5"></i>
+              <span class="text-[10px] font-semibold">Araç</span>
+            </button>
+
+            {/* 5. Etkinlik */}
+            <button
+              onClick={() => setCurrentTab('activity')}
+              class={`flex flex-col items-center justify-center w-14 py-1 transition ${
+                currentTab === 'activity' ? 'text-yellow-400' : 'text-gray-400 hover:text-gray-200'
+              }`}
+            >
+              <i class="fa-solid fa-calendar-days text-lg mb-0.5"></i>
+              <span class="text-[10px] font-semibold">Etkinlik</span>
+            </button>
+          </nav>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taksi Cepte - Hızlı Giriş & Vardiya Yönetimi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            taxi: {
+              yellow: '#FACC15',
+              dark: '#0d1117',
+              surface: '#161b22',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.05); }
+    }
+    .animate-pulse-glow {
+      animation: pulseGlow 2.5s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-[#080b0f] text-gray-100 flex items-center justify-center min-h-screen p-0 sm:p-4">
+
+  <!-- Mobile Screen Frame Simulator -->
+  <div class="relative w-full max-w-[420px] h-[880px] bg-[#0d1117] sm:rounded-[44px] border sm:border-gray-800 shadow-2xl flex flex-col overflow-hidden">
+    
+    <!-- Status Bar -->
+    <div class="pt-3 px-6 pb-1 flex justify-between items-center text-xs text-gray-400 select-none z-20">
+      <span class="font-semibold text-white">09:41</span>
+      <div class="w-20 h-4 bg-black/60 rounded-full mx-auto hidden sm:block"></div>
+      <div class="flex items-center space-x-1.5">
+        <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25C3.52 16.54 3 14.36 3 12c0-4.97 4.03-9 9-9s9 4.03 9 9c0 2.36-.52 4.54-1.35 6.25l-.62-.64C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/><path d="M12 6c-3.31 0-6 2.69-6 6 0 1.48.54 2.83 1.43 3.88l.71-.71C7.45 14.36 7 13.23 7 12c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.23-.45 2.36-1.14 3.17l.71.71C17.46 14.83 18 13.48 18 12c0-3.31-2.69-6-6-6z"/><circle cx="12" cy="12" r="2"/></svg>
+        <span class="text-[10px] font-bold">5G</span>
+        <div class="w-5 h-2.5 border border-gray-400 rounded-sm p-0.5 flex items-center">
+          <div class="h-full w-3 bg-amber-400 rounded-2xs"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Component Root Container -->
+    <div id="app" class="relative flex-1 flex flex-col overflow-hidden"></div>
+
+  </div>
+
+  <script>
+    // State
+    let isShiftActive = false;
+    let showEndModal = false;
+    let entryType = 'gelir'; // 'gelir' | 'gider'
+    let amount = '0';
+    let selectedCategory = 'Nakit';
+    let toastMessage = null;
+
+    function render() {
+      const app = document.getElementById('app');
+
+      let html = '';
+
+      // Toast Notification
+      if (toastMessage) {
+        html += `
+          <div class="absolute top-2 left-4 right-4 z-50 flex items-center gap-3 px-4 py-3 bg-gray-800/95 border border-amber-400/50 text-amber-300 rounded-2xl shadow-2xl backdrop-blur-md">
+            <svg class="w-5 h-5 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-xs font-bold text-gray-100">${toastMessage}</span>
+          </div>
+        `;
+      }
+
+      // UI Requirement 1: isShiftActive === false
+      if (!isShiftActive) {
+        html += `
+          <div class="flex-1 flex flex-col items-center justify-center p-6 text-center relative select-none">
+            <!-- Glow Effect -->
+            <div class="absolute w-64 h-64 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative cursor-pointer" onclick="startShift()">
+              <div class="absolute -inset-3 bg-gradient-to-r from-emerald-500 to-green-400 rounded-full blur-xl opacity-70 animate-pulse-glow"></div>
+              <button class="relative w-64 h-64 rounded-full bg-gradient-to-b from-emerald-500 to-green-600 text-white flex flex-col items-center justify-center p-6 shadow-2xl active:scale-95 transition-transform duration-150 border-4 border-emerald-300/40">
+                <div class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mb-3 shadow-inner">
+                  <svg class="w-10 h-10 fill-current text-white translate-x-0.5" viewBox="0 0 24 24">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                </div>
+                <span class="text-2xl font-black tracking-wider uppercase drop-shadow-md">
+                  ▶ SÜRÜŞÜ BAŞLAT
+                </span>
+                <span class="text-xs font-semibold text-emerald-100 mt-1 opacity-90">
+                  Vardiyayı Başlatmak İçin Dokun
+                </span>
+              </button>
+            </div>
+
+            <p class="mt-12 text-gray-500 text-xs font-bold uppercase tracking-widest">
+              Taksi Cepte • Hızlı Giriş Ekranı
+            </p>
+          </div>
+        `;
+      } else {
+        // UI Requirement 2: isShiftActive === true
+        html += `
+          <div class="flex-1 flex flex-col h-full px-4 pt-2 pb-4 select-none">
+            
+            <!-- 1. Header: Vardiya Durumu & Kırmızı SÜRÜŞÜ BİTİR Butonu -->
+            <div class="flex items-center justify-between py-1 mb-2">
+              <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
+                  Vardiya Aktif
+                </span>
+              </div>
+
+              <button onclick="openEndModal()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border-2 border-red-500/80 bg-red-500/10 text-red-400 text-xs font-black tracking-wider hover:bg-red-500 hover:text-white transition active:scale-95 uppercase shadow-md shadow-red-950/20">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+                <span>⏹ SÜRÜŞÜ BİTİR</span>
+              </button>
+            </div>
+
+            <!-- 2. Toggle: Gelir / Gider -->
+            <div class="grid grid-cols-2 p-1.5 bg-gray-950/90 rounded-2xl border border-gray-800 shadow-inner mb-3">
+              <button onclick="setEntry('gelir')" class="py-2.5 rounded-xl font-black text-xs sm:text-sm tracking-wide transition flex items-center justify-center gap-1.5 ${
+                entryType === 'gelir'
+                  ? 'bg-amber-400 text-gray-950 shadow-md shadow-amber-400/20'
+                  : 'text-gray-400 hover:text-gray-200'
+              }">
+                <span class="text-base leading-none">₺</span>
+                <span>GELİR (KAZANÇ)</span>
+              </button>
+
+              <button onclick="setEntry('gider')" class="py-2.5 rounded-xl font-black text-xs sm:text-sm tracking-wide transition flex items-center justify-center gap-1.5 ${
+                entryType === 'gider'
+                  ? 'bg-red-500 text-white shadow-md shadow-red-500/30'
+                  : 'text-gray-400 hover:text-gray-200'
+              }">
+                <span class="text-base leading-none">-</span>
+                <span>GİDER (HARCAMA)</span>
+              </button>
+            </div>
+
+            <!-- 3. Amount Display: Dev Merkezi Tutar -->
+            <div class="flex flex-col items-center justify-center py-2.5 px-4 bg-gray-900/90 rounded-2xl border border-gray-800/80 mb-3 shadow-inner">
+              <span class="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-0.5">
+                ${entryType === 'gelir' ? 'Tahsil Edilen Tutar' : 'Yapılan Harcama Tutarı'}
+              </span>
+              <div class="flex items-baseline justify-center gap-1.5">
+                <span class="text-2xl font-bold ${entryType === 'gelir' ? 'text-amber-400' : 'text-red-400'}">₺</span>
+                <span class="text-5xl font-black tracking-tight text-white font-mono">${amount}</span>
+              </div>
+            </div>
+
+            <!-- 4. Category Selectors: 3 Büyük Kare Buton -->
+            <div class="grid grid-cols-3 gap-2.5 mb-3">
+              ${
+                entryType === 'gelir'
+                  ? `
+                  <!-- Nakit (Yeşil) -->
+                  <button onclick="setCat('Nakit')" class="flex flex-col items-center justify-center p-2.5 rounded-2xl border-2 transition active:scale-95 ${
+                    selectedCategory === 'Nakit'
+                      ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 shadow-md shadow-emerald-950/40 ring-1 ring-emerald-400'
+                      : 'bg-gray-900/80 border-gray-800 text-gray-400 hover:border-gray-700'
+                  }">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center mb-1 text-emerald-400">
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold tracking-tight">Nakit</span>
+                  </button>
+
+                  <!-- POS (Mavi) -->
+                  <button onclick="setCat('POS')" class="flex flex-col items-center justify-center p-2.5 rounded-2xl border-2 transition active:scale-95 ${
+                    selectedCategory === 'POS'
+                      ? 'bg-sky-500/20 border-sky-400 text-sky-300 shadow-md shadow-sky-950/40 ring-1 ring-sky-400'
+                      : 'bg-gray-900/80 border-gray-800 text-gray-400 hover:border-gray-700'
+                  }">
+                    <div class="w-9 h-9 rounded-xl bg-sky-500/20 flex items-center justify-center mb-1 text-sky-400">
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold tracking-tight">POS / Kart</span>
+                  </button>
+
+                  <!-- Uygulamalar (Sarı) -->
+                  <button onclick="setCat('Uygulamalar')" class="flex flex-col items-center justify-center p-2.5 rounded-2xl border-2 transition active:scale-95 ${
+                    selectedCategory === 'Uygulamalar'
+                      ? 'bg-amber-400/20 border-amber-400 text-amber-300 shadow-md shadow-amber-950/40 ring-1 ring-amber-400'
+                      : 'bg-gray-900/80 border-gray-800 text-gray-400 hover:border-gray-700'
+                  }">
+                    <div class="w-9 h-9 rounded-xl bg-amber-400/20 flex items-center justify-center mb-1 text-amber-400">
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold tracking-tight">Uygulamalar</span>
+                  </button>
+                  `
+                  : `
+                  <!-- Yemek (Kırmızı) -->
+                  <button onclick="setCat('Yemek')" class="flex flex-col items-center justify-center p-2.5 rounded-2xl border-2 transition active:scale-95 ${
+                    selectedCategory === 'Yemek'
+                      ? 'bg-rose-500/20 border-rose-400 text-rose-300 shadow-md shadow-rose-950/40 ring-1 ring-rose-400'
+                      : 'bg-gray-900/80 border-gray-800 text-gray-400 hover:border-gray-700'
+                  }">
+                    <div class="w-9 h-9 rounded-xl bg-rose-500/20 flex items-center justify-center mb-1 text-rose-400">
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                    </div>
+                    <span class="text-xs font-bold tracking-tight">Yemek</span>
+                  </button>
+
+                  <!-- Yakıt (Turuncu) -->
+                  <button onclick="setCat('Yakıt')" class="flex flex-col items-center justify-center p-2.5 rounded-2xl border-2 transition active:scale-95 ${
+                    selectedCategory === 'Yakıt'
+                      ? 'bg-orange-500/20 border-orange-400 text-orange-300 shadow-md shadow-orange-950/40 ring-1 ring-orange-400'
+                      : 'bg-gray-900/80 border-gray-800 text-gray-400 hover:border-gray-700'
+                  }">
+                    <div class="w-9 h-9 rounded-xl bg-orange-500/20 flex items-center justify-center mb-1 text-orange-400">
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold tracking-tight">Yakıt</span>
+                  </button>
+
+                  <!-- Yıkama (Mavi) -->
+                  <button onclick="setCat('Yıkama')" class="flex flex-col items-center justify-center p-2.5 rounded-2xl border-2 transition active:scale-95 ${
+                    selectedCategory === 'Yıkama'
+                      ? 'bg-blue-500/20 border-blue-400 text-blue-300 shadow-md shadow-blue-950/40 ring-1 ring-blue-400'
+                      : 'bg-gray-900/80 border-gray-800 text-gray-400 hover:border-gray-700'
+                  }">
+                    <div class="w-9 h-9 rounded-xl bg-blue-500/20 flex items-center justify-center mb-1 text-blue-400">
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold tracking-tight">Yıkama</span>
+                  </button>
+                  `
+              }
+            </div>
+
+            <!-- 5. Custom Numpad: 3x4 Izgara -->
+            <div class="grid grid-cols-3 gap-2 flex-1 max-h-64 mb-3">
+              ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `
+                <button onclick="pressNum('${n}')" class="flex items-center justify-center text-2xl font-bold bg-gray-800/80 hover:bg-gray-700/80 text-white rounded-2xl active:scale-95 transition border border-gray-700/50 shadow font-mono">
+                  ${n}
+                </button>
+              `).join('')}
+
+              <button onclick="clearAmount()" class="flex items-center justify-center text-sm font-black text-gray-400 hover:text-white bg-gray-800/40 rounded-2xl active:scale-95 transition border border-gray-800">
+                C
+              </button>
+
+              <button onclick="pressNum('0')" class="flex items-center justify-center text-2xl font-bold bg-gray-800/80 hover:bg-gray-700/80 text-white rounded-2xl active:scale-95 transition border border-gray-700/50 shadow font-mono">
+                0
+              </button>
+
+              <button onclick="backspace()" class="flex items-center justify-center text-gray-300 hover:text-red-400 bg-gray-800/60 rounded-2xl active:scale-95 transition border border-gray-700/50 shadow">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-7.172a2 2 0 00-1.414.586L3 12z"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- 6. Save Button: Dev Sarı KAYDET -->
+            <button onclick="saveEntry()" ${amount === '0' ? 'disabled' : ''} class="w-full py-4 rounded-2xl text-base font-black tracking-wider uppercase flex items-center justify-center gap-2 shadow-xl transition active:scale-98 ${
+              amount === '0'
+                ? 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700'
+                : 'bg-amber-400 hover:bg-amber-300 text-gray-950 shadow-amber-400/30'
+            }">
+              <span>KAYDET</span>
+              ${amount !== '0' ? `<span class="text-sm font-bold opacity-80">(₺${amount})</span>` : ''}
+            </button>
+
+          </div>
+        `;
+      }
+
+      // UI Requirement 3: showEndModal === true
+      if (showEndModal) {
+        html += `
+          <div class="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div class="relative w-full max-w-sm bg-gray-900 border border-gray-800 rounded-3xl p-6 shadow-2xl text-left">
+              
+              <button onclick="closeEndModal()" class="absolute top-4 right-4 p-2 text-gray-400 hover:text-white rounded-full bg-gray-800/80">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+
+              <div class="flex items-center gap-3 mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400">
+                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/></svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-black text-white">Vardiya Sonu Kapanış</h3>
+                  <p class="text-xs text-gray-400">Günü tamamlamak için bilgileri girin</p>
+                </div>
+              </div>
+
+              <form onsubmit="submitShiftEnd(event)" class="space-y-4">
+                <div>
+                  <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5">
+                    Bugün toplam kaç KM yaptınız?
+                  </label>
+                  <div class="relative">
+                    <input id="kmInput" type="number" required placeholder="Örn: 185" class="w-full px-4 py-3.5 rounded-xl bg-gray-800/90 border border-gray-700 text-white placeholder-gray-500 font-bold focus:outline-none focus:border-amber-400">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">KM</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider mb-1.5">
+                    Toplam ne kadarlık yakıt aldınız? (₺)
+                  </label>
+                  <div class="relative">
+                    <input id="fuelInput" type="number" required placeholder="Örn: 650" class="w-full px-4 py-3.5 rounded-xl bg-gray-800/90 border border-gray-700 text-white placeholder-gray-500 font-bold focus:outline-none focus:border-amber-400">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-500">₺</span>
+                  </div>
+                </div>
+
+                <div class="pt-2">
+                  <button type="submit" class="w-full py-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 active:scale-98 text-white font-black text-sm tracking-wider uppercase shadow-lg shadow-emerald-950/40 transition">
+                    VARDİYAYI KAPAT
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        `;
+      }
+
+      app.innerHTML = html;
+    }
+
+    // Logic Functions
+    function startShift() {
+      isShiftActive = true;
+      render();
+    }
+
+    function openEndModal() {
+      showEndModal = true;
+      render();
+    }
+
+    function closeEndModal() {
+      showEndModal = false;
+      render();
+    }
+
+    function setEntry(type) {
+      entryType = type;
+      selectedCategory = type === 'gelir' ? 'Nakit' : 'Yemek';
+      render();
+    }
+
+    function setCat(cat) {
+      selectedCategory = cat;
+      render();
+    }
+
+    function pressNum(num) {
+      if (amount === '0') {
+        amount = num;
+      } else if (amount.length < 7) {
+        amount += num;
+      }
+      render();
+    }
+
+    function backspace() {
+      if (amount.length <= 1) {
+        amount = '0';
+      } else {
+        amount = amount.slice(0, -1);
+      }
+      render();
+    }
+
+    function clearAmount() {
+      amount = '0';
+      render();
+    }
+
+    function saveEntry() {
+      if (amount === '0') return;
+      toastMessage = `${entryType === 'gelir' ? 'Gelir' : 'Gider'} kaydedildi: ₺${amount} (${selectedCategory})`;
+      amount = '0';
+      render();
+      setTimeout(() => {
+        toastMessage = null;
+        render();
+      }, 2500);
+    }
+
+    function submitShiftEnd(e) {
+      e.preventDefault();
+      showEndModal = false;
+      isShiftActive = false;
+      amount = '0';
+      toastMessage = "Vardiya başarıyla kapatıldı.";
+      render();
+      setTimeout(() => {
+        toastMessage = null;
+        render();
+      }, 2500);
+    }
+
+    // Init
+    render();
+  </script>
+</body>
+</html>

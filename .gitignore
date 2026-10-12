@@ -1,0 +1,5 @@
+node_modules/
+.claude/settings.local.json
+
+# Expo şablonunun ilk Git deposunun yedeği (ana depoya taşınırken)
+.yedek-uygulama-git/

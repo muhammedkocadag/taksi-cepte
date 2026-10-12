@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="tr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Taksi Cepte - Hızlı Giriş</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            taxi: {
+              yellow: '#FACC15',
+              dark: '#0d1117',
+              surface: '#161b22',
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .key-btn {
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body class="bg-[#05070a] text-gray-100 flex items-center justify-center min-h-screen p-0 sm:p-4">
+<!-- Mobile Screen Frame Simulator -->
+<div class="relative w-full max-w-[420px] h-[880px] bg-[#0d1117] sm:rounded-[44px] border sm:border-gray-800 shadow-2xl flex flex-col overflow-hidden">
+<!-- Status Bar -->
+<div class="pt-3.5 px-6 pb-1 flex justify-between items-center text-xs text-gray-400 select-none z-20">
+<span class="font-semibold text-white tracking-tight">09:41</span>
+<div class="w-20 h-4 bg-black/60 rounded-full mx-auto hidden sm:block"></div>
+<div class="flex items-center space-x-1.5">
+<svg class="w-3.5 h-3.5 fill-current text-gray-300" viewbox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 18.25C3.52 16.54 3 14.36 3 12c0-4.97 4.03-9 9-9s9 4.03 9 9c0 2.36-.52 4.54-1.35 6.25l-.62-.64C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"></path><path d="M12 6c-3.31 0-6 2.69-6 6 0 1.48.54 2.83 1.43 3.88l.71-.71C7.45 14.36 7 13.23 7 12c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.23-.45 2.36-1.14 3.17l.71.71C17.46 14.83 18 13.48 18 12c0-3.31-2.69-6-6-6z"></path><circle cx="12" cy="12" r="2"></circle></svg>
+<span class="text-[10px] font-bold text-gray-300">5G</span>
+<div class="w-5 h-2.5 border border-gray-400 rounded-sm p-0.5 flex items-center">
+<div class="h-full w-3 bg-amber-400 rounded-2xs"></div>
+</div>
+</div>
+</div>
+<!-- App Root Container -->
+<div class="relative flex-1 flex flex-col overflow-hidden px-4 pb-4 pt-1" id="app"></div>
+</div>
+<script>
+    // State
+    let amount = '750';
+    let toast = null;
+
+    function render() {
+      const app = document.getElementById('app');
+
+      let html = '';
+
+      // Toast Notification
+      if (toast) {
+        const isIncome = toast.type === 'gelir';
+        html += `
+          <div class="absolute top-2 left-4 right-4 z-50 flex items-center gap-3 px-4 py-3 ${
+            isIncome ? 'bg-emerald-950/95 border-emerald-500/60 text-emerald-200' : 'bg-red-950/95 border-red-500/60 text-red-200'
+          } border rounded-2xl shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top duration-200">
+            <span class="text-xl">${toast.icon}</span>
+            <div class="flex-1 text-left">
+              <div class="text-xs font-black uppercase tracking-wider text-white">${toast.title}</div>
+              <div class="text-[11px] font-medium text-gray-300">${toast.detail}</div>
+            </div>
+            <span class="font-mono font-bold text-sm text-white">₺${toast.amount}</span>
+          </div>
+        `;
+      }
+
+      html += `
+        <div class="flex-1 flex flex-col justify-between">
+          
+          <!-- Üst Alan: Vazgeç & Tutar Göstergesi -->
+          <div>
+            <!-- Üst Çubuk (Vazgeç Butonu & Başlık) -->
+            <div class="flex items-center justify-between pt-1 pb-2">
+              <button onclick="cancelAction()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-800/80 hover:bg-gray-700 active:scale-95 text-gray-300 text-sm font-bold transition border border-gray-700/60 shadow-sm">
+                <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span>Vazgeç</span>
+              </button>
+
+              <span class="text-[11px] font-extrabold uppercase tracking-widest text-amber-400/90 bg-amber-400/10 px-2.5 py-1 rounded-full border border-amber-400/20">
+                Hızlı Giriş
+              </span>
+            </div>
+
+            <!-- Tutar Alanı (Büyük Tutar Göstergesi) -->
+            <div class="my-2 py-4 px-5 bg-gradient-to-b from-[#141b24] to-[#101620] rounded-3xl border border-gray-800/90 shadow-inner flex items-center justify-between">
+              <span class="text-xs font-black uppercase tracking-wider text-gray-400">TUTAR</span>
+              <div class="flex items-baseline justify-end gap-2 text-right">
+                <span class="text-3xl font-extrabold text-amber-400 select-none font-mono">₺</span>
+                <span class="text-5xl font-black tracking-tight text-white font-mono min-w-[80px] drop-shadow-md">
+                  ${amount === '' ? '0' : amount}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sayısal Klavye (Numpad) Izgarası: 3x4 Izgara -->
+          <div class="grid grid-cols-3 gap-2.5 my-1">
+            <button onclick="pressNum('1')" class="key-btn h-14 rounded-2xl bg-[#171f2c] hover:bg-[#1f293b] active:scale-95 text-2xl font-black text-white font-mono border border-gray-700/50 shadow-sm transition">1</button>
+            <button onclick="pressNum('2')" class="key-btn h-14 rounded-2xl bg-[#171f2c] hover:bg-[#1f293b] active:scale-95 text-2xl font-black text-white font-mono border border-gray-700/50 shadow-sm transition">2</button>
+            <button onclick="pressNum('3')" class="key-btn h-14 rounded-2xl bg-[#171f2c] hover:bg-[#1f293b] active:scale-95 text-2xl font-black text-white font-mono border border-gray-700/50 shadow-sm transition">3</button>
+
+            <button onclick="pressNum('4')" class="key-btn h-14 rounded-2xl bg-[#171f2c] hover:bg-[#1f293b] active:scale-95 text-2xl font-black text-white font-mono border border-gray-700/50 shadow-sm transition">4</button>
+            <button onclick="pressNum('5')" class="key-btn h-14 rounded-2xl bg-[#171f2c] hover:bg-[#1f293b] active:scale-95 text-2xl font-black text-white font-mono border border-gray-700/50 shadow-sm transition">5</button>
+            <button onclick="pressNum('6')" class="key-btn h-14 rounded-2xl bg-[#171f2c] hover:bg-[#1f293b] active:scale-95 text-2xl font-black text-white font-mono border border-gray-700/50 shadow-sm transition">6</button>
+
+            <button onclick="pressNum('7')" class="key-btn h-14 rounded-2xl bg-[#171f2c] hover:bg-[#1f293b] active:scale-95 text-2xl font-black text-white font-mono border border-gray-700/50 shadow-sm transition">7</button>
+            <button onclick="pressNum('8')" class="key-btn h-14 rounded-2xl bg-[#171f2c] hover:bg-[#1f293b] active:scale-95 text-2xl font-black text-white font-mono border border-gray-700/50 shadow-sm transition">8</button>
+            <button onclick="pressNum('9')" class="key-btn h-14 rounded-2xl bg-[#171f2c] hover:bg-[#1f293b] active:scale-95 text-2xl font-black text-white font-mono border border-gray-700/50 shadow-sm transition">9</button>
+
+            <button onclick="clearAmount()" class="key-btn h-14 rounded-2xl bg-[#131923] hover:bg-gray-800 active:scale-95 text-lg font-black text-amber-400 font-mono border border-gray-800 shadow-sm transition">C</button>
+            <button onclick="pressNum('0')" class="key-btn h-14 rounded-2xl bg-[#171f2c] hover:bg-[#1f293b] active:scale-95 text-2xl font-black text-white font-mono border border-gray-700/50 shadow-sm transition">0</button>
+            <button onclick="backspace()" class="key-btn h-14 rounded-2xl bg-[#131923] hover:bg-gray-800 active:scale-95 text-gray-300 hover:text-red-400 border border-gray-800 shadow-sm transition flex items-center justify-center">
+              <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-7.172a2 2 0 00-1.414.586L3 12z"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Hızlı Kaydet Butonları (Tek Dokunuşla Kaydeder) -->
+          <div class="space-y-3 pt-1">
+            
+            <!-- GELİR Bölümü (Yeşil Tema) -->
+            <div>
+              <div class="flex items-center gap-1.5 px-1 mb-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/80"></span>
+                <span class="text-[11px] font-black tracking-wider uppercase text-emerald-400">GELİR</span>
+                <span class="text-[10px] text-gray-500 font-medium">(Tek tıkla anında kaydet)</span>
+              </div>
+              <div class="grid grid-cols-3 gap-2">
+                <button onclick="quickSave('gelir', 'Nakit', '💵')" class="key-btn py-3 px-2 rounded-2xl bg-gradient-to-b from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-extrabold text-sm active:scale-95 transition shadow-lg shadow-emerald-950/50 border border-emerald-400/40 flex flex-col items-center justify-center gap-0.5">
+                  <span class="text-lg">💵</span>
+                  <span class="tracking-wide">Nakit</span>
+                </button>
+
+                <button onclick="quickSave('gelir', 'POS', '💳')" class="key-btn py-3 px-2 rounded-2xl bg-gradient-to-b from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-extrabold text-sm active:scale-95 transition shadow-lg shadow-emerald-950/50 border border-emerald-400/40 flex flex-col items-center justify-center gap-0.5">
+                  <span class="text-lg">💳</span>
+                  <span class="tracking-wide">POS</span>
+                </button>
+
+                <button onclick="quickSave('gelir', 'Uyg.', '📱')" class="key-btn py-3 px-2 rounded-2xl bg-gradient-to-b from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-extrabold text-sm active:scale-95 transition shadow-lg shadow-emerald-950/50 border border-emerald-400/40 flex flex-col items-center justify-center gap-0.5">
+                  <span class="text-lg">📱</span>
+                  <span class="tracking-wide">Uyg.</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- GİDER Bölümü (Kırmızı Tema) -->
+            <div>
+              <div class="flex items-center gap-1.5 px-1 mb-1.5">
+                <span class="w-2 h-2 rounded-full bg-rose-500 shadow-sm shadow-rose-500/80"></span>
+                <span class="text-[11px] font-black tracking-wider uppercase text-rose-400">GİDER</span>
+                <span class="text-[10px] text-gray-500 font-medium">(Tek tıkla anında kaydet)</span>
+              </div>
+              <div class="grid grid-cols-3 gap-2">
+                <button onclick="quickSave('gider', 'Yakıt', '⛽')" class="key-btn py-3 px-2 rounded-2xl bg-gradient-to-b from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white font-extrabold text-sm active:scale-95 transition shadow-lg shadow-rose-950/50 border border-rose-400/40 flex flex-col items-center justify-center gap-0.5">
+                  <span class="text-lg">⛽</span>
+                  <span class="tracking-wide">Yakıt</span>
+                </button>
+
+                <button onclick="quickSave('gider', 'Yemek', '🍽️')" class="key-btn py-3 px-2 rounded-2xl bg-gradient-to-b from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white font-extrabold text-sm active:scale-95 transition shadow-lg shadow-rose-950/50 border border-rose-400/40 flex flex-col items-center justify-center gap-0.5">
+                  <span class="text-lg">🍽️</span>
+                  <span class="tracking-wide">Yemek</span>
+                </button>
+
+                <button onclick="quickSave('gider', 'Diğer', '•••')" class="key-btn py-3 px-2 rounded-2xl bg-gradient-to-b from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white font-extrabold text-sm active:scale-95 transition shadow-lg shadow-rose-950/50 border border-rose-400/40 flex flex-col items-center justify-center gap-0.5">
+                  <span class="text-lg">•••</span>
+                  <span class="tracking-wide">Diğer</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      `;
+
+      app.innerHTML = html;
+    }
+
+    // Logic Functions
+    function pressNum(num) {
+      if (amount === '0' || amount === '') {
+        amount = num;
+      } else if (amount.length < 6) {
+        amount += num;
+      }
+      render();
+    }
+
+    function backspace() {
+      if (amount.length <= 1) {
+        amount = '0';
+      } else {
+        amount = amount.slice(0, -1);
+      }
+      render();
+    }
+
+    function clearAmount() {
+      amount = '0';
+      render();
+    }
+
+    function cancelAction() {
+      amount = '0';
+      toast = {
+        type: 'gelir',
+        icon: '↩️',
+        title: 'İşlem İptal Edildi',
+        detail: 'Tutar sıfırlandı.',
+        amount: '0'
+      };
+      render();
+      setTimeout(() => {
+        toast = null;
+        render();
+      }, 2000);
+    }
+
+    let toastTimer = null;
+    function quickSave(type, category, icon) {
+      const currentVal = (amount === '' || amount === '0') ? '0' : amount;
+      if (currentVal === '0') {
+        toast = {
+          type: 'gider',
+          icon: '⚠️',
+          title: 'Tutar Girilmedi',
+          detail: 'Lütfen önce klavyeden bir tutar girin.',
+          amount: '0'
+        };
+        render();
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast = null;
+          render();
+        }, 2200);
+        return;
+      }
+
+      toast = {
+        type: type,
+        icon: icon,
+        title: type === 'gelir' ? `${category} Geliri Kaydedildi` : `${category} Gideri Kaydedildi`,
+        detail: 'İşlem vardiya defterine işlendi',
+        amount: currentVal
+      };
+
+      amount = '0';
+      render();
+
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast = null;
+        render();
+      }, 2600);
+    }
+
+    // Init
+    render();
+  </script>
+</body></html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html><html lang="tr"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Taksi Cepte - Analiz Ekranı</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&amp;family=JetBrains+Mono:wght@500;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0b0f17;
+      color: #ffffff;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Hide scrollbars but keep functionality */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#0b0f17] flex justify-center min-h-screen text-gray-100">
+
+  <div class="w-full max-w-md min-h-screen bg-[#0d1117] flex flex-col px-4 pt-6 pb-24 relative select-none">
+    
+    <!-- Top Status / Header -->
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <span class="text-[11px] font-bold tracking-widest text-gray-400 uppercase">Taksi Cepte</span>
+        <h1 class="text-xl font-black text-white tracking-tight">Finansal Analiz</h1>
+      </div>
+      <div class="w-10 h-10 rounded-xl bg-gray-800/80 border border-gray-700/60 flex items-center justify-center text-yellow-400 shadow-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 1. Top Toggle (Zaman Filtresi) -->
+    <div class="grid grid-cols-3 p-1 bg-gray-950/80 rounded-2xl border border-gray-800 shadow-inner mb-4" id="timeFilterGroup">
+      <button onclick="setFilter('daily')" id="btn-daily" class="py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all duration-150 bg-yellow-400 text-gray-950 shadow-md">
+        Günlük
+      </button>
+      <button onclick="setFilter('weekly')" id="btn-weekly" class="py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-150 text-gray-400 hover:text-gray-200">
+        Haftalık
+      </button>
+      <button onclick="setFilter('monthly')" id="btn-monthly" class="py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-150 text-gray-400 hover:text-gray-200">
+        Aylık
+      </button>
+    </div>
+
+    <!-- 2. Financial Summary Card -->
+    <div class="p-5 rounded-2xl bg-gray-800/90 border border-gray-700/70 shadow-lg mb-4 relative overflow-hidden">
+      <div class="flex items-center justify-between mb-1.5">
+        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+          </svg>
+          Net Kâr
+        </span>
+        <span id="profitMarginBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-mono">
+          +%81.5
+        </span>
+      </div>
+
+      <!-- Main Number -->
+      <div id="netProfitDisplay" class="text-4xl font-black text-emerald-400 tracking-tight font-mono mb-4">
+        ₺ 1.850
+      </div>
+
+      <!-- Divider -->
+      <div class="h-px bg-gray-700/60 mb-3"></div>
+
+      <!-- Sub Numbers -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-gray-700/60 flex items-center justify-center text-white shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M17 7H7M17 7V17"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Toplam Ciro</p>
+            <p id="totalRevenueDisplay" class="text-sm font-bold text-white font-mono">₺ 2.270</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-red-500/15 border border-red-500/20 flex items-center justify-center text-red-400 shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 7L7 17M7 17H17M7 17V7"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Toplam Gider</p>
+            <p id="totalExpenseDisplay" class="text-sm font-bold text-red-400 font-mono">₺ 420</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Performance Chart -->
+    <div class="p-4 rounded-2xl bg-gray-800/90 border border-gray-700/70 shadow-lg mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+          </svg>
+          Ciro Dağılım Grafiği
+        </h2>
+        <span id="chartPeriodBadge" class="text-[10px] font-bold text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full border border-yellow-400/20">24 Saat</span>
+      </div>
+
+      <!-- Chart Containers -->
+      <!-- Daily (24h) -->
+      <div id="chart-daily" class="block"><div class="overflow-x-auto pb-2 no-scrollbar"><div class="flex items-end gap-2.5 h-36 min-w-[580px] px-2 pt-2" id="dailyBars"><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺30</span><div class="w-full flex items-end justify-center h-22"><div style="height: 15%;" class="w-full max-w-[14px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">00:00</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺20</span><div class="w-full flex items-end justify-center h-22"><div style="height: 10%;" class="w-full max-w-[14px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">02:00</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺10</span><div class="w-full flex items-end justify-center h-22"><div style="height: 8%;" class="w-full max-w-[14px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">04:00</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺90</span><div class="w-full flex items-end justify-center h-22"><div style="height: 35%;" class="w-full max-w-[14px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">06:00</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺280</span><div class="w-full flex items-end justify-center h-22"><div style="height: 85%;" class="w-full max-w-[14px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">08:00</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-yellow-400 font-bold opacity-100">₺320</span><div class="w-full flex items-end justify-center h-22"><div style="height: 100%;" class="w-full max-w-[14px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-extrabold text-yellow-400">10:00</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺240</span><div class="w-full flex items-end justify-center h-22"><div style="height: 75%;" class="w-full max-w-[14px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">12:00</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺260</span><div class="w-full flex items-end justify-center h-22"><div style="height: 80%;" class="w-full max-w-[14px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">14:00</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺310</span><div class="w-full flex items-end justify-center h-22"><div style="height: 95%;" class="w-full max-w-[14px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">16:00</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺290</span><div class="w-full flex items-end justify-center h-22"><div style="height: 90%;" class="w-full max-w-[14px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">18:00</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺230</span><div class="w-full flex items-end justify-center h-22"><div style="height: 70%;" class="w-full max-w-[14px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">20:00</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺150</span><div class="w-full flex items-end justify-center h-22"><div style="height: 50%;" class="w-full max-w-[14px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">22:00</span></div></div></div><p class="text-[10px] text-gray-500 text-center mt-1">← Sağa/sola kaydırarak 24 saati inceleyin →</p></div>
+
+      <!-- Weekly (7d) -->
+      <div id="chart-weekly" class="hidden"><div class="flex items-end justify-between h-36 px-1 pt-2" id="weeklyBars"><div class="flex-1 flex flex-col items-center gap-1.5 px-1"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺1.9K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 65%;" class="w-full max-w-[20px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-xs font-bold text-gray-400">Pzt</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-1"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺2.1K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 75%;" class="w-full max-w-[20px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-xs font-bold text-gray-400">Sal</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-1"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺1.8K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 60%;" class="w-full max-w-[20px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-xs font-bold text-gray-400">Çar</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-1"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺2.4K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 85%;" class="w-full max-w-[20px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-xs font-bold text-gray-400">Per</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-1"><span class="text-[9px] font-mono text-yellow-400 font-bold opacity-100">₺2.9K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 100%;" class="w-full max-w-[20px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-xs font-black text-yellow-400">Cum</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-1"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺2.7K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 95%;" class="w-full max-w-[20px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-xs font-bold text-gray-400">Cmt</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-1"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺1.3K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 45%;" class="w-full max-w-[20px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-xs font-bold text-gray-400">Paz</span></div></div></div>
+
+      <!-- Monthly (24 months) -->
+      <div id="chart-monthly" class="hidden"><div class="overflow-x-auto pb-2 no-scrollbar"><div class="flex items-end gap-2.5 h-36 min-w-[580px] px-2 pt-2" id="monthlyBars"><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺38K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 60%;" class="w-full max-w-[16px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">Oca</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺34K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 55%;" class="w-full max-w-[16px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">Şub</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺41K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 68%;" class="w-full max-w-[16px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">Mar</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺44K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 72%;" class="w-full max-w-[16px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">Nis</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺50K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 82%;" class="w-full max-w-[16px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">May</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-yellow-400 font-bold opacity-100">₺60K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 100%;" class="w-full max-w-[16px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-extrabold text-yellow-400">Haz</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺55K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 90%;" class="w-full max-w-[16px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">Tem</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺52K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 85%;" class="w-full max-w-[16px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">Ağu</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺46K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 75%;" class="w-full max-w-[16px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">Eyl</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺48K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 78%;" class="w-full max-w-[16px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">Eki</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺42K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 68%;" class="w-full max-w-[16px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">Kas</span></div><div class="flex-1 flex flex-col items-center gap-1.5 px-0.5"><span class="text-[9px] font-mono text-gray-400 opacity-80">₺56K</span><div class="w-full flex items-end justify-center h-22"><div style="height: 92%;" class="w-full max-w-[16px] bg-yellow-400 rounded-md shadow-sm"></div></div><span class="text-[10px] font-bold text-gray-400">Ara</span></div></div></div><p class="text-[10px] text-gray-500 text-center mt-1">← Sağa/sola kaydırarak ayları inceleyin →</p></div>
+    </div>
+
+    <!-- 4. Expense Breakdown (Simplified Progress Bars) -->
+    <div class="p-4 rounded-2xl bg-gray-800/90 border border-gray-700/70 shadow-lg">
+      <div class="flex items-center justify-between mb-3.5">
+        <h2 class="text-xs font-bold text-gray-300 uppercase tracking-wider">
+          Gider Kırılımı
+        </h2>
+        <span id="breakdownTotal" class="text-xs font-bold text-red-400 font-mono">
+          Toplam ₺ 420
+        </span>
+      </div>
+
+      <div class="space-y-3.5">
+        <!-- Yakıt - %60 (Orange) -->
+        <div>
+          <div class="flex items-center justify-between text-xs font-bold mb-1.5">
+            <span class="text-gray-200 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h10a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM15 8h2a2 2 0 012 2v8a2 2 0 01-2 2h-2M6 8h6M6 12h6"></path>
+              </svg>
+              Yakıt
+            </span>
+            <span id="fuelValue" class="text-orange-400 font-mono">%60 (₺ 252)</span>
+          </div>
+          <div class="w-full h-2.5 bg-gray-950/80 rounded-full overflow-hidden border border-gray-800">
+            <div class="h-full bg-orange-500 rounded-full transition-all duration-300 shadow-sm shadow-orange-500/50" style="width: 60%"></div>
+          </div>
+        </div>
+
+        <!-- Yemek - %25 (Red) -->
+        <div>
+          <div class="flex items-center justify-between text-xs font-bold mb-1.5">
+            <span class="text-gray-200 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+              </svg>
+              Yemek
+            </span>
+            <span id="foodValue" class="text-rose-400 font-mono">%25 (₺ 105)</span>
+          </div>
+          <div class="w-full h-2.5 bg-gray-950/80 rounded-full overflow-hidden border border-gray-800">
+            <div class="h-full bg-red-500 rounded-full transition-all duration-300 shadow-sm shadow-red-500/50" style="width: 25%"></div>
+          </div>
+        </div>
+
+        <!-- Diğer - %15 (Gray) -->
+        <div>
+          <div class="flex items-center justify-between text-xs font-bold mb-1.5">
+            <span class="text-gray-200 flex items-center gap-1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="19" cy="12" r="1"></circle>
+                <circle cx="5" cy="12" r="1"></circle>
+              </svg>
+              Diğer
+            </span>
+            <span id="otherValue" class="text-gray-400 font-mono">%15 (₺ 63)</span>
+          </div>
+          <div class="w-full h-2.5 bg-gray-950/80 rounded-full overflow-hidden border border-gray-800">
+            <div class="h-full bg-gray-500 rounded-full transition-all duration-300" style="width: 15%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fixed Bottom Navigation Bar -->
+    <div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-[#0d1117]/95 border-t border-gray-800/80 backdrop-blur-md px-6 py-2.5 flex items-center justify-between z-40">
+      <!-- Ana Sayfa -->
+      <a href="#" class="flex flex-col items-center gap-1 text-gray-500 hover:text-gray-300 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path>
+        </svg>
+        <span class="text-[10px] font-bold">Ana Sayfa</span>
+      </a>
+
+      <!-- Analiz (Aktif) -->
+      <a href="#" class="flex flex-col items-center gap-1 text-yellow-400 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+        </svg>
+        <span class="text-[10px] font-black">Analiz</span>
+      </a>
+
+      <!-- Central Yellow Floating "+" Button -->
+      <div class="-mt-6 flex flex-col items-center">
+        <button class="w-13 h-13 w-12 h-12 rounded-full bg-gradient-to-tr from-yellow-500 to-amber-300 text-gray-950 font-black flex items-center justify-center shadow-lg shadow-yellow-500/30 active:scale-95 transition-transform border-4 border-[#0d1117]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Araç -->
+      <a href="#" class="flex flex-col items-center gap-1 text-gray-500 hover:text-gray-300 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2 2h10l2-2z"></path>
+        </svg>
+        <span class="text-[10px] font-bold">Araç</span>
+      </a>
+
+      <!-- Etkinlik -->
+      <a href="#" class="flex flex-col items-center gap-1 text-gray-500 hover:text-gray-300 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <span class="text-[10px] font-bold">Etkinlik</span>
+      </a>
+    </div>
+
+  </div>
+
+  <script>
+    const data = {
+      daily: {
+        profit: '₺ 1.850',
+        revenue: '₺ 2.270',
+        expense: '₺ 420',
+        margin: '+%81.5',
+        period: '24 Saat',
+        fuel: '%60 (₺ 252)',
+        food: '%25 (₺ 105)',
+        other: '%15 (₺ 63)'
+      },
+      weekly: {
+        profit: '₺ 11.400',
+        revenue: '₺ 14.850',
+        expense: '₺ 3.450',
+        margin: '+%76.7',
+        period: '7 Gün',
+        fuel: '%60 (₺ 2.070)',
+        food: '%25 (₺ 862)',
+        other: '%15 (₺ 518)'
+      },
+      monthly: {
+        profit: '₺ 46.200',
+        revenue: '₺ 59.800',
+        expense: '₺ 13.600',
+        margin: '+%77.2',
+        period: '24 Ay',
+        fuel: '%60 (₺ 8.160)',
+        food: '%25 (₺ 3.400)',
+        other: '%15 (₺ 2.040)'
+      }
+    };
+
+    // Populate Daily Bars
+    const dailyHours = [
+      { l: '00', v: 15 }, { l: '01', v: 10 }, { l: '02', v: 5 }, { l: '03', v: 0 },
+      { l: '04', v: 0 }, { l: '05', v: 20 }, { l: '06', v: 45 }, { l: '07', v: 80 },
+      { l: '08', v: 95 }, { l: '09', v: 70 }, { l: '10', v: 60 }, { l: '11', v: 65 },
+      { l: '12', v: 75 }, { l: '13', v: 50 }, { l: '14', v: 85 }, { l: '15', v: 60 },
+      { l: '16', v: 90 }, { l: '17', v: 100 }, { l: '18', v: 95 }, { l: '19', v: 80 },
+      { l: '20', v: 70 }, { l: '21', v: 55 }, { l: '22', v: 40 }, { l: '23', v: 25 },
+    ];
+    const dailyContainer = document.getElementById('dailyBars');
+    dailyHours.forEach(h => {
+      const height = Math.max(h.v, 6);
+      dailyContainer.innerHTML += `
+        <div class="flex-1 flex flex-col items-center gap-1.5">
+          <div class="w-full flex items-end justify-center h-24 bg-gray-950/40 rounded-md p-0.5">
+            <div style="height: ${height}%;" class="w-full max-w-[14px] bg-yellow-400 rounded-sm"></div>
+          </div>
+          <span class="text-[9px] font-mono text-gray-400 font-semibold">${h.l}</span>
+        </div>
+      `;
+    });
+
+    // Populate Weekly Bars
+    const weeklyDays = [
+      { l: 'Pzt', v: 65, a: '₺1.9K' },
+      { l: 'Sal', v: 75, a: '₺2.1K' },
+      { l: 'Çar', v: 60, a: '₺1.8K' },
+      { l: 'Per', v: 85, a: '₺2.4K' },
+      { l: 'Cum', v: 100, a: '₺2.9K' },
+      { l: 'Cmt', v: 95, a: '₺2.7K' },
+      { l: 'Paz', v: 45, a: '₺1.3K' },
+    ];
+    const weeklyContainer = document.getElementById('weeklyBars');
+    weeklyDays.forEach(d => {
+      weeklyContainer.innerHTML += `
+        <div class="flex-1 flex flex-col items-center gap-1.5 px-1">
+          <span class="text-[9px] font-mono text-gray-400 opacity-80">${d.a}</span>
+          <div class="w-full flex items-end justify-center h-22 bg-gray-950/40 rounded-lg p-0.5">
+            <div style="height: ${d.v}%;" class="w-full max-w-[20px] bg-yellow-400 rounded-md shadow-sm"></div>
+          </div>
+          <span class="text-xs font-bold ${d.v === 100 ? 'text-yellow-400 font-black' : 'text-gray-400'}">${d.l}</span>
+        </div>
+      `;
+    });
+
+    // Populate Monthly Bars (24 months)
+    const monthlyMonths = [
+      { l: '01/23', v: 60 }, { l: '02/23', v: 55 }, { l: '03/23', v: 65 }, { l: '04/23', v: 70 },
+      { l: '05/23', v: 80 }, { l: '06/23', v: 90 }, { l: '07/23', v: 85 }, { l: '08/23', v: 75 },
+      { l: '09/23', v: 85 }, { l: '10/23', v: 70 }, { l: '11/23', v: 65 }, { l: '12/23', v: 80 },
+      { l: '01/24', v: 75 }, { l: '02/24', v: 70 }, { l: '03/24', v: 85 }, { l: '04/24', v: 90 },
+      { l: '05/24', v: 95 }, { l: '06/24', v: 100 }, { l: '07/24', v: 90 }, { l: '08/24', v: 85 },
+      { l: '09/24', v: 90 }, { l: '10/24', v: 85 }, { l: '11/24', v: 80 }, { l: '12/24', v: 95 }
+    ];
+    const monthlyContainer = document.getElementById('monthlyBars');
+    monthlyMonths.forEach(m => {
+      const height = Math.max(m.v, 8);
+      monthlyContainer.innerHTML += `
+        <div class="flex-1 flex flex-col items-center gap-1.5">
+          <div class="w-full flex items-end justify-center h-24 bg-gray-950/40 rounded-md p-0.5">
+            <div style="height: ${height}%;" class="w-full max-w-[16px] bg-yellow-400 rounded-sm"></div>
+          </div>
+          <span class="text-[9px] font-mono text-gray-400 font-medium whitespace-nowrap">${m.l}</span>
+        </div>
+      `;
+    });
+
+    function setFilter(type) {
+      const btnDaily = document.getElementById('btn-daily');
+      const btnWeekly = document.getElementById('btn-weekly');
+      const btnMonthly = document.getElementById('btn-monthly');
+
+      const chartDaily = document.getElementById('chart-daily');
+      const chartWeekly = document.getElementById('chart-weekly');
+      const chartMonthly = document.getElementById('chart-monthly');
+
+      // Reset classes
+      [btnDaily, btnWeekly, btnMonthly].forEach(b => {
+        b.className = 'py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-150 text-gray-400 hover:text-gray-200';
+      });
+
+      const activeBtn = type === 'daily' ? btnDaily : (type === 'weekly' ? btnWeekly : btnMonthly);
+      activeBtn.className = 'py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-wider transition-all duration-150 bg-yellow-400 text-gray-950 shadow-md';
+
+      // Update data
+      const d = data[type];
+      document.getElementById('netProfitDisplay').textContent = d.profit;
+      document.getElementById('totalRevenueDisplay').textContent = d.revenue;
+      document.getElementById('totalExpenseDisplay').textContent = d.expense;
+      document.getElementById('profitMarginBadge').textContent = d.margin;
+      document.getElementById('chartPeriodBadge').textContent = d.period;
+      document.getElementById('breakdownTotal').textContent = 'Toplam ' + d.expense;
+      document.getElementById('fuelValue').textContent = d.fuel;
+      document.getElementById('foodValue').textContent = d.food;
+      document.getElementById('otherValue').textContent = d.other;
+
+      // Toggle charts
+      chartDaily.classList.add('hidden');
+      chartWeekly.classList.add('hidden');
+      chartMonthly.classList.add('hidden');
+
+      if (type === 'daily') chartDaily.classList.remove('hidden');
+      if (type === 'weekly') chartWeekly.classList.remove('hidden');
+      if (type === 'monthly') chartMonthly.classList.remove('hidden');
+    }
+  </script>
+
+
+
+</body></html>
