@@ -19,7 +19,7 @@ Kullanıcı: bilgisayar mühendisliği 3. sınıf öğrencisi, uygulamayı iş h
 - `react-dom` bilerek `react` ile aynı sürüme sabitli (19.2.3); yükseltirken ikisini birlikte değiştir, yoksa npm ERESOLVE verir.
 - Sekmeler `src/app/(tabs)/` içinde, `expo-router/ui` özel sekmeleri + `src/components/TabBar.tsx` (ortada + butonu; vardiya kapalıysa başlatıp kayda gider). Typed routes deneysel özelliği kapalı: "/" rotasını tanımıyordu.
 - **Tuzak:** stil nesnesinde `x.value` kullanma (ör. `{ flex: p.value }`). Reanimated'ın babel eklentisi bunu kendi animasyon değeri sanıp geliştirme modunda uyarı kodu ekliyor; o kod bu sürümde olmayan bir fonksiyonu çağırıp "undefined is not a function" ile çöküyor. Alan adını `amount` gibi başka bir şey yap. `tsc` ve `expo export` (yayın modu) bunu yakalamaz.
-- Git: tek depo, kökte (`uygulama/` içinde ayrı `.git` YOK; Expo şablonunun açtığı iç depo kaldırıldı, yedeği `.yedek-uygulama-git/`, kayıt dışı). İlk kayıt `ca94409`. Kökteki `tasarim2…13` ve `taksi-cepte-onizleme.html`, `tasarim/` ve `onizleme.html`'in kopyaları; kayda alınmadı.
+- Git: tek depo, kökte (`uygulama/` içinde ayrı `.git` YOK; Expo şablonunun açtığı iç depo kaldırıldı, yedeği `.yedek-uygulama-git/`, kayıt dışı). İlk kayıt `ca94409`.
 - Paket eklerken `npx expo install`; işi bitirmeden önce `npx tsc --noEmit` ve `npx expo-doctor`.
 
 ## Ürün kararları
