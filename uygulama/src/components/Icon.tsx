@@ -5,7 +5,8 @@ const PATHS = {
   home: '<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
   pie: '<path d="M21 12A9 9 0 1 1 12 3v9z"/><path d="M15 3.4A9 9 0 0 1 20.6 9H15z"/>',
   cal: '<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/>',
-  car: '<path d="M3 13l2.2-5.6A2 2 0 0 1 7.1 6h9.8a2 2 0 0 1 1.9 1.4L21 13v5H3z"/><path d="M7 18v2M17 18v2M7 14.5h.01M17 14.5h.01"/>',
+  // Yandan görünüş sedan (taksi gibi): kaput, cam, bagaj, iki tekerlek.
+  car: '<path d="M4.9 16H3.1a.7.7 0 0 1-.7-.7v-2.1c0-.6.5-1 1-1H6l2.3-3c.3-.4.8-.6 1.3-.6h4.1c.5 0 1 .2 1.3.6l3 3 2.4.4c.7.1 1.2.7 1.2 1.3v1.4a.7.7 0 0 1-.7.7H19.1"/><path d="M9.1 16h5.8"/><path d="M6.6 12.2h11"/><path d="M11.9 9.1v3.1"/><circle cx="7" cy="16" r="2.1"/><circle cx="17" cy="16" r="2.1"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   play: '<path d="M8 5v14l11-7z" fill="currentColor"/>',
   stop: '<rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/>',

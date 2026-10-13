@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Backdrop } from '@/components/Backdrop';
 import { EditEntrySheet } from '@/components/EditEntrySheet';
@@ -60,29 +60,32 @@ export default function Home() {
 
   if (!current) {
     return (
-      <SafeAreaView style={s.screen} edges={['top']}>
+      // DİKKAT: açık ve kapalı görünüm aynı dış kabı (View) ve aynı ilk çocukları (Backdrop, sheets)
+      // kullanmalı. Farklı olursa vardiya bitince pencere baştan kurulur: km'yi iki kez sorar, özet gelmez.
+      <View style={s.screen}>
         <Backdrop />
-        {/* İki görünümde de aynı yerde: vardiya bitince özet penceresi kaybolmasın. */}
         {sheets}
-        <View style={s.header}>
-          <View style={s.pill}>
-            <View style={[s.dot, { backgroundColor: c.red }]} />
-            <Text style={[s.pillText, { color: c.muted }]}>Vardiya kapalı</Text>
+        <View style={{ flex: 1, paddingTop: insets.top }}>
+          <View style={s.header}>
+            <View style={s.pill}>
+              <View style={[s.dot, { backgroundColor: c.red }]} />
+              <Text style={[s.pillText, { color: c.muted }]}>Vardiya kapalı</Text>
+            </View>
+            {settingsBtn}
           </View>
-          {settingsBtn}
-        </View>
-        <View style={s.closed}>
-          <View style={s.taxi}>
-            <Icon name="car" size={46} color={c.yellowInk} />
+          <View style={s.closed}>
+            <View style={s.taxi}>
+              <Icon name="car" size={46} color={c.yellowInk} />
+            </View>
+            <Text style={s.closedTitle}>Sürüşe başlamadınız.</Text>
+            <Text style={s.closedText}>Kazanç, harcama ve yolculuklarını kaydetmek için vardiyanı başlat.</Text>
+            <Pressable style={s.cta} onPress={startShift} accessibilityRole="button">
+              <Icon name="play" size={18} color={solid.onYellow} />
+              <Text style={s.ctaText}>Vardiyayı Başlat</Text>
+            </Pressable>
           </View>
-          <Text style={s.closedTitle}>Sürüşe başlamadınız.</Text>
-          <Text style={s.closedText}>Kazanç, harcama ve yolculuklarını kaydetmek için vardiyanı başlat.</Text>
-          <Pressable style={s.cta} onPress={startShift} accessibilityRole="button">
-            <Icon name="play" size={18} color={solid.onYellow} />
-            <Text style={s.ctaText}>Vardiyayı Başlat</Text>
-          </Pressable>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 
