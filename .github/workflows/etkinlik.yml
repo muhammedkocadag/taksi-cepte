@@ -48,5 +48,14 @@ jobs:
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
         run: |
           printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          # Anahtar doğru mu? (değerleri değil, sadece alan adlarını yazar)
+          node -e '
+            let j; try { j = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")); } catch { j = null; }
+            if (!j || j.type !== "service_account" || !j.client_email || !j.private_key) {
+              console.log("::error title=FIREBASE_SERVICE_ACCOUNT yanlış::Servis hesabı anahtarı değil. Bulunan alanlar: " + (j ? Object.keys(j).join(", ") : "(JSON okunamadı)") + ". IAM → Service accounts → etkinlik-toplayici → Keys → Add key → JSON ile yeni anahtar oluşturup tamamını yapıştır.");
+              process.exit(1);
+            }
+            console.log("Servis hesabı: " + j.client_email.split("@")[0]);
+          ' "$RUNNER_TEMP/sa.json"
           GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" node etkinlik/topla.mjs --yaz
           rm -f "$RUNNER_TEMP/sa.json"

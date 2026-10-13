@@ -106,6 +106,18 @@ describe('birleştirme', () => {
     assert.deepEqual(l.map((e) => [e.id, e.source]), [['20261017-eryaman', 'tff'], ['20261017-eryaman-2', 'belediye']]);
   });
 
+  it("Google'ın bir gün kaymış maçı, resmi kaynaktaki aynı stadyum maçının tekrarı sayılır", () => {
+    const l = birlestir(
+      [
+        mac(),
+        { kaynak: 'serpapi', tur: 'Futbol', baslik: 'Gençlerbirliği vs Galatasaray', mekanAdi: 'Eryaman Stadyumu', ankara: true, baslangic: trZaman('2026-10-18', '15:00') },
+        { kaynak: 'serpapi', tur: 'Konser', baslik: 'Stadyum konseri', mekanAdi: 'Eryaman Stadyumu', ankara: true, baslangic: trZaman('2026-10-18', '21:00') },
+      ],
+      SIMDI,
+    );
+    assert.deepEqual(l.map((e) => [e.id, e.source]), [['20261017-eryaman', 'tff'], ['20261018-eryaman', 'serpapi']]);
+  });
+
   it('bayram arifesi ve ulusal bayram', () => {
     const t = tatilAdaylari([
       { date: '2026-05-27', localName: 'Kurban Bayramı 1. Gün' },

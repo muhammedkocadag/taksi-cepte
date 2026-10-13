@@ -13,6 +13,7 @@ const TR = 3 * SAAT; // Türkiye UTC+3, yaz saati yok
 // Aynı mekânda bu kadar yakın başlayan iki kayıt aynı etkinliktir.
 const AYNI_ETKINLIK = 3 * SAAT;
 const ILERI_GUN = 60;
+const SPOR = new Set(['Futbol', 'Basketbol', 'Voleybol', 'Spor']);
 
 // Tekrarda hangi kaynağın bilgisi tutulur (yüksek kazanır).
 const ONCELIK = { tff: 3, apisports: 2, tsdb: 2, serpapi: 1, belediye: 1, tatil: 0 };
@@ -76,6 +77,10 @@ export function birlestir(adaylar, now = Date.now()) {
       if (ayni.demand === 'orta' && e.demand !== 'orta') ayni.demand = e.demand;
       continue;
     }
+    // Google (serpapi) maç tarihlerini bazen bir gün kaydırıyor: aynı stadyumda 2 gün içinde resmi kaynaktan
+    // (TFF, spor API'leri) bir maç varsa Google'ınki aynı maçtır.
+    if (e.source === 'serpapi' && SPOR.has(e.cat) && kalan.some((k) => k.venue === e.venue && SPOR.has(k.cat) && Math.abs(k.start - e.start) < 2 * GUN))
+      continue;
     // Aynı gün aynı mekânda ikinci ayrı etkinlik (ör. öğlen ve akşam konseri): kimliği ayır.
     while (kalan.some((k) => k.id === e.id)) e.id += '-2';
     kalan.push(e);
