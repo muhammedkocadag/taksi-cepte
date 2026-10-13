@@ -1,0 +1,270 @@
+{
+ "events_results": [
+  {
+   "title": "Simge",
+   "type": "Turkish pop concert",
+   "date": {
+    "start_date": "Nov 8",
+    "when": "Nov 8, 8:00 PM"
+   },
+   "address": [
+    "Jolly Joker Ankara",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Jolly Joker Ankara"
+   }
+  },
+  {
+   "title": "中部プロ・アマダンス選手権大会",
+   "type": "Samkvæmisdansmót",
+   "date": {
+    "start_date": "Oct 25",
+    "when": "Oct 25, 9:00 PM"
+   },
+   "address": [
+    "IF Performance Hall",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "IF Performance Hall"
+   }
+  },
+  {
+   "title": "Kovacs",
+   "type": "Soulful electronic blues",
+   "date": {
+    "start_date": "Dec 9",
+    "when": "Dec 9, 8:00 PM"
+   },
+   "address": [
+    "Jolly Joker Ankara",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Jolly Joker Ankara"
+   }
+  },
+  {
+   "title": "Paradise Lost",
+   "type": "Gothic metal concert",
+   "date": {
+    "start_date": "Nov 16",
+    "when": "Nov 16, 7:00 PM"
+   },
+   "address": [
+    "Milyon Performance Hall",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Milyon Performance Hall"
+   }
+  },
+  {
+   "title": "Sansar Salvo @ Social Street",
+   "date": {
+    "start_date": "Nov 6",
+    "when": "Nov 6, 9:00 PM"
+   },
+   "address": [
+    "Social Street",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Social Street"
+   }
+  },
+  {
+   "title": "Jolly Joker",
+   "type": "Live concert hall performance",
+   "date": {
+    "start_date": "Nov 29",
+    "when": "Nov 29, 7:00 PM"
+   },
+   "address": [
+    "Jolly Joker Ankara",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Jolly Joker Ankara"
+   }
+  },
+  {
+   "title": "Gece Yolcuları",
+   "type": "Софт рок концерт",
+   "date": {
+    "start_date": "Nov 25",
+    "when": "Nov 25, 9:00 PM"
+   },
+   "address": [
+    "Milyon Performance Hall",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Milyon Performance Hall"
+   }
+  },
+  {
+   "title": "Ahmediyar",
+   "type": "에스닉 퓨전 음악",
+   "date": {
+    "start_date": "Oct 28",
+    "when": "Oct 28, 9:00 PM"
+   },
+   "address": [
+    "Milyon Performance Hall",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Milyon Performance Hall"
+   }
+  },
+  {
+   "title": "Uzi",
+   "type": "Turkish rap concert",
+   "date": {
+    "start_date": "Nov 28",
+    "when": "Nov 28, 9:30 PM"
+   },
+   "address": [
+    "Milyon Performance Hall",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Milyon Performance Hall"
+   }
+  },
+  {
+   "title": "Alphaville",
+   "type": "Synth-pop concert",
+   "date": {
+    "start_date": "Jan 16",
+    "when": "Jan 16, 9:00 PM"
+   },
+   "address": [
+    "Congresium Kongre ve Sergi Merkezi",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Congresium Kongre ve Sergi Merkezi"
+   }
+  },
+  {
+   "title": "KARM6",
+   "date": {
+    "start_date": "Oct 23",
+    "when": "Oct 23, 8:30 PM"
+   },
+   "address": [
+    "Atılım Üniversitesi Amfi Tiyatro",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Atılım Üniversitesi Amfi Tiyatro"
+   }
+  },
+  {
+   "title": "Ellen Allien",
+   "type": "Techno performance",
+   "date": {
+    "start_date": "Oct 16",
+    "when": "Oct 16, 11:00 PM"
+   },
+   "address": [
+    "Kite",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Kite"
+   }
+  },
+  {
+   "title": "Albert Camus",
+   "date": {
+    "start_date": "Oct 28",
+    "when": "Oct 28, 8:00 PM"
+   },
+   "address": [
+    "Arcadium Actor Studio Sahnesi",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Arcadium Actor Studio Sahnesi"
+   }
+  },
+  {
+   "title": "Kayhan Kalhor with Erdal Erzincan",
+   "type": "Traditional world music concert",
+   "date": {
+    "start_date": "Dec 19",
+    "when": "Dec 19, 8:00 PM"
+   },
+   "address": [
+    "MEB Şura Salonu",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "MEB Şura Salonu"
+   }
+  },
+  {
+   "title": "Erdal Erzincan",
+   "type": "Turkish folk music",
+   "date": {
+    "start_date": "Dec 15",
+    "when": "Dec 15, 8:00 PM"
+   },
+   "address": [
+    "MEB Şura Salonu",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "MEB Şura Salonu"
+   }
+  },
+  {
+   "title": "The Nutcracker - State Ballet of Georgia",
+   "type": "Classical ballet performance",
+   "date": {
+    "start_date": "Dec 20",
+    "when": "Dec 20, 2:30 PM"
+   },
+   "address": [
+    "Congresium Kongre ve Sergi Merkezi",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Congresium Kongre ve Sergi Merkezi"
+   }
+  },
+  {
+   "title": "Turk Telekom vs Fraport Skyliners Frankfurt",
+   "type": "Eurocup basketball match",
+   "date": {
+    "start_date": "Nov 4",
+    "when": "Nov 4, 7:30 PM"
+   },
+   "address": [
+    "Ankara Arena",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Ankara Arena"
+   }
+  },
+  {
+   "title": "The Illusionist - Enver Ertaş",
+   "date": {
+    "start_date": "Nov 13",
+    "when": "Nov 13, 8:00 PM"
+   },
+   "address": [
+    "Panora Rossetti",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Panora Rossetti"
+   }
+  }
+ ]
+}

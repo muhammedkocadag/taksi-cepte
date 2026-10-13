@@ -1,0 +1,138 @@
+{
+ "events_results": [
+  {
+   "title": "Candles and Echoes: Golden Swan",
+   "date": {
+    "start_date": "Nov 6",
+    "when": "Nov 6, 8:30 PM"
+   },
+   "address": [
+    "CSO ADA ANKARA",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "CSO ADA ANKARA"
+   }
+  },
+  {
+   "title": "Mısra",
+   "date": {
+    "start_date": "Oct 19",
+    "when": "Oct 19, 8:00 PM"
+   },
+   "address": [
+    "AES Sanat Tiyatrosu",
+    "Ankara, Türkiye"
+   ],
+   "price": "$10",
+   "extracted_price": 10,
+   "venue": {
+    "name": "AES Sanat Tiyatrosu"
+   }
+  },
+  {
+   "title": "Ankara Dance Festival",
+   "date": {
+    "start_date": "Nov 26",
+    "when": "Nov 26, 12:00 PM"
+   },
+   "address": [
+    "The Green Park Hotel Ankara",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "The Green Park Hotel Ankara"
+   }
+  },
+  {
+   "title": "O.M.G",
+   "date": {
+    "start_date": "Oct 13",
+    "when": "Oct 13, 8:00 PM"
+   },
+   "address": [
+    "Ve Sahne Panora",
+    "Ankara, Türkiye"
+   ],
+   "price": "$14",
+   "extracted_price": 14,
+   "venue": {
+    "name": "Ve Sahne Panora"
+   }
+  },
+  {
+   "title": "Fall Turkey Fairs",
+   "date": {
+    "start_date": "Oct 21",
+    "when": "Oct 21"
+   },
+   "address": [
+    "Sheraton Ankara Hotel & Convention Center",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Sheraton Ankara Hotel & Convention Center"
+   }
+  },
+  {
+   "title": "Melihat Gülses Özel Konseri - Geçmişten Günümüze Gönül Şarkıları",
+   "date": {
+    "start_date": "Oct 14",
+    "when": "Oct 14, 8:00 PM"
+   },
+   "address": [
+    "CSO Tarihi Salon",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "CSO Tarihi Salon"
+   }
+  },
+  {
+   "title": "Murat Uncuoglu",
+   "date": {
+    "start_date": "Oct 17",
+    "when": "Oct 17, 11:30 PM"
+   },
+   "address": [
+    "Backyard Secrets",
+    "Ankara, Türkiye"
+   ],
+   "price": "$10",
+   "extracted_price": 10,
+   "venue": {
+    "name": "Backyard Secrets"
+   }
+  },
+  {
+   "title": "Candlelight: Tarkan Saygı Gecesi in Ankara",
+   "date": {
+    "start_date": "Nov 14",
+    "when": "Nov 14, 6:00 PM"
+   },
+   "address": [
+    "Intercontinental Grand Ankara Hotel",
+    "Ankara, Türkiye"
+   ],
+   "price": "$29",
+   "extracted_price": 29,
+   "venue": {
+    "name": "Intercontinental Grand Ankara Hotel"
+   }
+  },
+  {
+   "title": "VEF GLOBAL EDUCATION FAIR – ANKARA 2026",
+   "date": {
+    "start_date": "Oct 14",
+    "when": "Oct 14, 12:00 PM"
+   },
+   "address": [
+    "Congresium Kongre ve Sergi Merkezi",
+    "Ankara, Türkiye"
+   ],
+   "venue": {
+    "name": "Congresium Kongre ve Sergi Merkezi"
+   }
+  }
+ ]
+}

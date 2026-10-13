@@ -6,3 +6,7 @@ node_modules/
 
 # Firebase emülatör günlükleri
 *-debug.log
+
+# Gizli anahtarlar (etkinlik toplayıcı)
+.env
+*.env.local
