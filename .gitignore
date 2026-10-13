@@ -3,3 +3,6 @@ node_modules/
 
 # Expo şablonunun ilk Git deposunun yedeği (ana depoya taşınırken)
 .yedek-uygulama-git/
+
+# Firebase emülatör günlükleri
+*-debug.log

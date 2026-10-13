@@ -1,0 +1,127 @@
+rules_version = '2';
+
+// Taksi Cepte — Firestore güvenlik kuralları
+// İlke: herkes sadece kendi verisini görür ve yazar. Gelen veri biçim olarak denetlenir.
+// Veri düzeni telefondaki SQLite tablolarıyla aynı (uygulama/src/store/db.ts):
+//   users/{uid}                    profil + ayarlar
+//   users/{uid}/shifts/{id}        vardiyalar
+//   users/{uid}/entries/{id}       gelir-gider kayıtları
+//   users/{uid}/vehicle/me         araç (tek belge)
+//   events/{id}                    etkinlikler (herkes okur, sadece sunucu görevi yazar)
+// Silme "yumuşak": deleted = true (eşitleme için). Gerçek silme sadece hesap silinirken.
+// Test: firebase/test (yerel emülatörde).
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isInt(v) {
+      return v is int;
+    }
+
+    function optInt(v) {
+      return v == null || v is int;
+    }
+
+    function shortString(v, max) {
+      return v is string && v.size() <= max;
+    }
+
+    // Eşitleme: eski değişiklik yenisinin üzerine yazamaz (geç bağlanan telefon buluttaki yeni hali ezmesin).
+    // Aynı zaman damgasıyla tekrar gönderim (>=) zararsız olduğu için izinli.
+    function notOlder() {
+      return request.resource.data.updated_at >= resource.data.updated_at;
+    }
+
+    // Her belgede eşitleme alanları zorunlu.
+    function hasSyncFields(d) {
+      return isInt(d.updated_at) && d.deleted is bool;
+    }
+
+    function validShift(d) {
+      return d.keys().hasOnly(['start', 'end', 'km', 'updated_at', 'deleted'])
+        && d.keys().hasAll(['start', 'updated_at', 'deleted'])
+        && isInt(d.start)
+        && optInt(d.get('end', null))
+        && optInt(d.get('km', null))
+        && (d.get('km', null) == null || (d.km >= 0 && d.km <= 5000))
+        && hasSyncFields(d);
+    }
+
+    function validEntry(d) {
+      return d.keys().hasOnly(['shift_id', 'at', 'category', 'amount', 'updated_at', 'deleted'])
+        && d.keys().hasAll(['shift_id', 'at', 'category', 'amount', 'updated_at', 'deleted'])
+        && shortString(d.shift_id, 40)
+        && isInt(d.at)
+        && d.category in ['Nakit', 'POS', 'Uygulama', 'Yakıt', 'Yemek', 'Diğer']
+        && isInt(d.amount) && d.amount >= 1 && d.amount <= 999999
+        && hasSyncFields(d);
+    }
+
+    function validVehicle(d) {
+      return d.keys().hasOnly(['plate', 'model', 'year', 'fuel', 'odo', 'odo_at', 'svc_last', 'svc_int',
+                               'muayene', 'sigorta', 'updated_at', 'deleted'])
+        && shortString(d.plate, 12)
+        && shortString(d.model, 60)
+        && optInt(d.get('year', null))
+        && shortString(d.fuel, 20)
+        && isInt(d.odo) && d.odo >= 0 && d.odo <= 9999999
+        && isInt(d.odo_at)
+        && optInt(d.get('svc_last', null))
+        && isInt(d.svc_int) && d.svc_int > 0
+        && optInt(d.get('muayene', null))
+        && optInt(d.get('sigorta', null))
+        && hasSyncFields(d);
+    }
+
+    function validProfile(d) {
+      return d.keys().hasOnly(['name', 'il', 'settings', 'updated_at'])
+        && shortString(d.get('name', ''), 40)
+        && shortString(d.get('il', ''), 30)
+        && (d.get('settings', {}) is map && d.get('settings', {}).size() <= 50)
+        && isInt(d.updated_at);
+    }
+
+    match /users/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create: if isOwner(uid) && validProfile(request.resource.data);
+      allow update: if isOwner(uid) && validProfile(request.resource.data) && notOlder();
+
+      match /shifts/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid) && validShift(request.resource.data);
+        allow update: if isOwner(uid) && validShift(request.resource.data) && notOlder();
+      }
+
+      match /entries/{id} {
+        allow read, delete: if isOwner(uid);
+        allow create: if isOwner(uid) && validEntry(request.resource.data);
+        allow update: if isOwner(uid) && validEntry(request.resource.data) && notOlder();
+      }
+
+      match /vehicle/{id} {
+        allow read, delete: if isOwner(uid) && id == 'me';
+        allow create: if isOwner(uid) && id == 'me' && validVehicle(request.resource.data);
+        allow update: if isOwner(uid) && id == 'me' && validVehicle(request.resource.data) && notOlder();
+      }
+    }
+
+    // Etkinlikler: giriş yapan herkes okur; yazma sadece sunucu görevinden (Admin SDK kuralları atlar).
+    match /events/{id} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // Geri kalan her şey kapalı.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
