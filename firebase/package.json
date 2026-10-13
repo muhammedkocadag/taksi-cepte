@@ -7,7 +7,10 @@
     "deploy:rules": "firebase deploy --only firestore:rules",
     "test:etkinlik": "node --test test/etkinlik.test.mjs",
     "etkinlik": "node --env-file-if-exists=.env etkinlik/topla.mjs",
-    "etkinlik:emulator": "firebase emulators:exec --only firestore --project demo-taksi-cepte \"node --env-file-if-exists=.env etkinlik/topla.mjs --yaz && node --env-file-if-exists=.env etkinlik/topla.mjs --yaz\""
+    "etkinlik:emulator": "firebase emulators:exec --only firestore --project demo-taksi-cepte \"node --env-file-if-exists=.env etkinlik/topla.mjs --yaz && node --env-file-if-exists=.env etkinlik/topla.mjs --yaz\"",
+    "panel:emulator": "firebase emulators:start --only auth,firestore,hosting --project demo-taksi-cepte",
+    "panel:ornek": "node test/panel-ornek-veri.mjs",
+    "deploy:panel": "firebase deploy --only hosting --project taksi-cepte-9c4ac"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",

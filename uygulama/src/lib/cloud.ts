@@ -9,6 +9,7 @@ import {
   where,
 } from '@react-native-firebase/firestore';
 
+import type { DeviceInfo } from '@/lib/deviceInfo';
 import type { Cloud, CloudRow, ProfileDoc, Table } from '@/store/sync';
 
 // Eşitleme beyninin (src/store/sync.ts) Firebase'e bağlanan ince katmanı.
@@ -74,4 +75,17 @@ export function firebaseCloud(uid: string): Cloud {
       return s.exists() ? (s.data() as ProfileDoc) : null;
     },
   };
+}
+
+// Yönetim paneli için hesap kaydı (`accounts/{uid}`): ilk girişte oluşturulur, sonra açılışlarda en çok
+// 6 saatte bir son giriş ve cihaz bilgisi güncellenir. `phone` Firebase Auth'taki doğrulanmış numara (+90…);
+// kurallar başka numarayı reddeder.
+const SEEN_EVERY_MS = 6 * 3_600_000;
+
+export async function touchAccount(uid: string, phone: string, info: DeviceInfo, now = Date.now()) {
+  const ref = doc(getFirestore(), 'accounts', uid);
+  const snap = await withTimeout(getDocFromServer(ref));
+  const old = snap.exists() ? (snap.data() as { created_at: number; last_seen: number } & DeviceInfo) : null;
+  if (old && now - old.last_seen < SEEN_EVERY_MS && old.app === info.app && old.os === info.os) return;
+  await withTimeout(setDoc(ref, { phone, ...info, created_at: old?.created_at ?? now, last_seen: now }));
 }

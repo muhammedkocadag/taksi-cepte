@@ -10,3 +10,6 @@ node_modules/
 # Gizli anahtarlar (etkinlik toplayıcı)
 .env
 *.env.local
+
+# Firebase yayın önbelleği
+.firebase/

@@ -81,8 +81,9 @@ Uygulamanın topladığı veriler (Aşama 2 sonrası, Firebase ile):
 | Araç bilgileri (plaka, km, bakım tarihleri) | Uygulamanın işlevi | Evet | Hayır |
 | Çalıştığı il | Etkinlikleri gösterme | Evet | Hayır |
 | Kullanıcı kimliği (Firebase) | Hesabı tanıma | Evet | Hayır |
+| Cihaz bilgisi (iOS/Android, model, sistem ve uygulama sürümü), kayıt ve son giriş zamanı | Destek ve uygulamanın işletilmesi (yönetim paneli) | Evet | Hayır |
 
-Konum, kişiler, fotoğraf, reklam kimliği toplanmıyor. Reklam ve izleme yok. Veriler üçüncü taraflarla paylaşılmıyor (Firebase/Google veri işleyen olarak). Kullanıcı hesabını ve bütün verilerini uygulamadan silebiliyor (Ayarlar → Hesabı sil).
+Konum, kişiler, fotoğraf, reklam kimliği toplanmıyor. Yönetim panelinde sadece uygulama sahibi ad, telefon, il, araç ve cihaz bilgisini görür; gelir-gider kayıtları panelde yoktur (Firestore kurallarıyla engelli). App Store beyanında cihaz bilgisi "Diagnostics → Other Diagnostic Data" (kişiyle ilişkili, izleme yok) olarak işaretlenir; yayından önce Apple'ın güncel listesiyle kontrol et.
 
 Aşama 2'de çökme raporu (Crashlytics vb.) ya da analitik eklenirse bu tablo güncellenmeli.
 

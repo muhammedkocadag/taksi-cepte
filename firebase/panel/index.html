@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Taksi Cepte Panel</title>
+  <link rel="icon" href="favicon.png" />
+  <style>
+    :root {
+      --bg: #000; --card: rgba(28, 28, 30, 0.85); --line: rgba(255, 255, 255, 0.09);
+      --text: #f5f5f7; --muted: #a1a1a6; --faint: #6e6e73; --yellow: #facc15; --on-yellow: #1a1a1a;
+      --green: #34c759; --red: #ff453a; --sunk: rgba(255, 255, 255, 0.06);
+      color-scheme: dark;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f2f2f7; --card: #fff; --line: rgba(0, 0, 0, 0.08); --text: #1c1c1e; --muted: #6e6e73;
+        --faint: #8e8e93; --yellow: #eab308; --green: #16a34a; --red: #dc2626; --sunk: rgba(0, 0, 0, 0.05);
+        color-scheme: light;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font: 15px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      font-variant-numeric: tabular-nums;
+    }
+    main { max-width: 1180px; margin: 0 auto; padding: 24px 16px 60px; }
+    header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    header img { width: 36px; height: 36px; border-radius: 9px; }
+    h1 { font-size: 22px; margin: 0; letter-spacing: -0.3px; flex: 1; }
+    h1 span { color: var(--yellow); }
+    .who { color: var(--muted); font-size: 13.5px; }
+    button {
+      font: inherit; font-weight: 600; border: 0; border-radius: 12px; padding: 10px 16px; cursor: pointer;
+      background: var(--sunk); color: var(--text);
+    }
+    button.primary { background: var(--yellow); color: var(--on-yellow); }
+    button:disabled { opacity: 0.5; cursor: default; }
+    .center { text-align: center; padding: 80px 16px; }
+    .center p { color: var(--muted); max-width: 420px; margin: 12px auto 24px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 24px 0 16px; }
+    .stat { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; }
+    .stat b { display: block; font-size: 28px; letter-spacing: -0.5px; }
+    .stat small { color: var(--muted); font-size: 13px; }
+    .tools { display: flex; gap: 10px; margin-bottom: 12px; }
+    input[type=search] {
+      flex: 1; font: inherit; color: var(--text); background: var(--card); border: 1px solid var(--line);
+      border-radius: 12px; padding: 10px 14px; outline: none; min-width: 0;
+    }
+    input[type=search]:focus { border-color: var(--yellow); }
+    .box { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 12.5px; color: var(--muted); font-weight: 600; padding: 12px 14px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    tr:last-child td { border-bottom: 0; }
+    td .sub { color: var(--faint); font-size: 12.5px; }
+    .tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 7px; background: var(--sunk); color: var(--muted); }
+    .tag.ios { color: var(--text); }
+    .tag.android { color: var(--green); }
+    .empty { color: var(--faint); text-align: center; padding: 40px; }
+    .err { color: var(--red); }
+    .note { color: var(--faint); font-size: 12.5px; margin-top: 12px; }
+    td.nowrap { white-space: nowrap; }
+    /* Telefon: tablo yerine kartlar */
+    @media (max-width: 760px) {
+      thead { display: none; }
+      table, tbody, tr, td { display: block; width: 100%; }
+      tr { padding: 12px 14px; border-bottom: 1px solid var(--line); }
+      td { border: 0; padding: 2px 0; }
+      td[data-l]::before { content: attr(data-l) ": "; color: var(--faint); font-size: 12.5px; }
+      td.name { font-size: 17px; font-weight: 600; padding-bottom: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <img src="favicon.png" alt="" />
+      <h1>Taksi <span>Cepte</span> · Panel</h1>
+      <span class="who" id="who"></span>
+      <button id="out" hidden>Çıkış</button>
+    </header>
+
+    <section id="login" class="center" hidden>
+      <h2>Yönetim paneli</h2>
+      <p>Sadece yönetici hesabı girebilir. Şoförlerin gelir-gider kayıtları bu panelde yoktur.</p>
+      <button class="primary" id="in">Google ile giriş yap</button>
+      <p class="err" id="loginErr"></p>
+      <div id="dev" hidden class="tools" style="max-width:420px;margin:0 auto">
+        <input type="search" id="devMail" placeholder="Emülatör: e-posta" />
+        <button id="devIn">Emülatörde gir</button>
+      </div>
+    </section>
+
+    <section id="denied" class="center" hidden>
+      <h2>Bu hesabın yetkisi yok</h2>
+      <p id="deniedText"></p>
+    </section>
+
+    <section id="app" hidden>
+      <div class="stats" id="stats"></div>
+      <div class="tools">
+        <input type="search" id="q" placeholder="Ad, telefon, il, araç ya da cihaz ara" autocomplete="off" />
+        <button id="reload">Yenile</button>
+      </div>
+      <div class="box">
+        <table>
+          <thead>
+            <tr><th>Ad</th><th>Telefon</th><th>İl</th><th>Araç</th><th>Cihaz</th><th>Kayıt</th><th>Son giriş</th></tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <p class="note" id="note"></p>
+    </section>
+  </main>
+  <script type="module" src="panel.js"></script>
+</body>
+</html>

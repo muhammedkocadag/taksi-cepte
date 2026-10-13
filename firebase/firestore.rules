@@ -8,6 +8,8 @@ rules_version = '2';
 //   users/{uid}/entries/{id}       gelir-gider kayıtları
 //   users/{uid}/vehicle/me         araç (tek belge)
 //   events/{id}                    etkinlikler (herkes okur, sadece sunucu görevi yazar)
+//   accounts/{uid}                 hesap kaydı: doğrulanmış telefon, cihaz, kayıt ve son giriş (yönetim paneli için)
+// Yönetici (panel, firebase/panel/): profil, araç ve hesap kaydını OKUR; vardiya ve gelir-gider kayıtlarını OKUYAMAZ.
 // Silme "yumuşak": deleted = true (eşitleme için). Gerçek silme sadece hesap silinirken.
 // Test: firebase/test (yerel emülatörde).
 
@@ -20,6 +22,13 @@ service cloud.firestore {
 
     function isOwner(uid) {
       return signedIn() && request.auth.uid == uid;
+    }
+
+    // Yönetim paneline Google hesabıyla giren kullanıcı. Şoförler telefonla girdiği için e-postaları yoktur.
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email == 'muhammedkocadag2003@gmail.com'
+        && request.auth.token.email_verified == true;
     }
 
     function isInt(v) {
@@ -89,8 +98,30 @@ service cloud.firestore {
         && isInt(d.updated_at);
     }
 
+    // Telefon numarası SMS ile doğrulanmış numaranın aynısı olmalı (uydurma numara yazılamaz).
+    function validAccount(d) {
+      return d.keys().hasOnly(['phone', 'platform', 'os', 'model', 'app', 'created_at', 'last_seen'])
+        && d.keys().hasAll(['phone', 'platform', 'created_at', 'last_seen'])
+        && d.phone == request.auth.token.phone_number
+        && d.platform in ['ios', 'android']
+        && shortString(d.get('os', ''), 20)
+        && shortString(d.get('model', ''), 60)
+        && shortString(d.get('app', ''), 20)
+        && isInt(d.created_at)
+        && isInt(d.last_seen);
+    }
+
+    match /accounts/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow delete: if isOwner(uid);
+      allow create: if isOwner(uid) && validAccount(request.resource.data);
+      allow update: if isOwner(uid) && validAccount(request.resource.data)
+        && request.resource.data.created_at == resource.data.created_at;
+    }
+
     match /users/{uid} {
-      allow read, delete: if isOwner(uid);
+      allow read: if isOwner(uid) || isAdmin();
+      allow delete: if isOwner(uid);
       allow create: if isOwner(uid) && validProfile(request.resource.data);
       allow update: if isOwner(uid) && validProfile(request.resource.data) && notOlder();
 
@@ -111,6 +142,11 @@ service cloud.firestore {
         allow create: if isOwner(uid) && id == 'me' && validVehicle(request.resource.data);
         allow update: if isOwner(uid) && id == 'me' && validVehicle(request.resource.data) && notOlder();
       }
+    }
+
+    // Panel bütün araçları tek sorguda okur (collectionGroup). Plaka da gelir ama panel göstermez.
+    match /{path=**}/vehicle/{id} {
+      allow read: if isAdmin();
     }
 
     // Etkinlikler: giriş yapan herkes okur; yazma sadece sunucu görevinden (Admin SDK kuralları atlar).

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { after, before, beforeEach, describe, it } from 'node:test';
 
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
-import { deleteDoc, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, collectionGroup, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
 
 let env;
 const now = Date.now();
@@ -27,6 +27,11 @@ beforeEach(async () => env.clearFirestore());
 const ali = () => env.authenticatedContext('ali').firestore();
 const veli = () => env.authenticatedContext('veli').firestore();
 const anon = () => env.unauthenticatedContext().firestore();
+// Şoför telefonla girer (token'da doğrulanmış numara), yönetici Google hesabıyla (doğrulanmış e-posta).
+const aliTel = () => env.authenticatedContext('ali', { phone_number: '+905321234567' }).firestore();
+const ADMIN = 'muhammedkocadag2003@gmail.com';
+const yonetici = () => env.authenticatedContext('panel', { email: ADMIN, email_verified: true }).firestore();
+const account = (o = {}) => ({ phone: '+905321234567', platform: 'ios', os: '18.2', model: 'iPhone 15', app: '1.0.0', created_at: now, last_seen: now, ...o });
 
 describe('kendi verisi', () => {
   it('şoför kendi vardiyasını, kaydını ve aracını yazar ve okur', async () => {
@@ -118,5 +123,61 @@ describe('etkinlikler ve diğer yerler', () => {
   it('tanımsız koleksiyonlar kapalı', async () => {
     await assertFails(setDoc(doc(ali(), 'baska/x'), { a: 1 }));
     await assertFails(getDoc(doc(ali(), 'baska/x')));
+  });
+});
+
+describe('hesap kaydı ve yönetim paneli', () => {
+  it('şoför kendi hesap kaydını doğrulanmış numarasıyla yazar, son girişi günceller', async () => {
+    const db = aliTel();
+    await assertSucceeds(setDoc(doc(db, 'accounts/ali'), account()));
+    await assertSucceeds(updateDoc(doc(db, 'accounts/ali'), { last_seen: now + 1000, app: '1.0.1' }));
+    await assertSucceeds(getDoc(doc(db, 'accounts/ali')));
+  });
+
+  it('uydurma numara, kayıt tarihini değiştirme, başkasının kaydı ve tanımsız alan reddedilir', async () => {
+    await assertFails(setDoc(doc(aliTel(), 'accounts/ali'), account({ phone: '+905009999999' })));
+    await assertFails(setDoc(doc(ali(), 'accounts/ali'), account())); // token'da numara yok
+    await setDoc(doc(aliTel(), 'accounts/ali'), account());
+    await assertFails(updateDoc(doc(aliTel(), 'accounts/ali'), { created_at: now - 1 }));
+    await assertFails(setDoc(doc(aliTel(), 'accounts/veli'), account()));
+    await assertFails(setDoc(doc(aliTel(), 'accounts/ali'), account({ platform: 'windows' })));
+    await assertFails(setDoc(doc(aliTel(), 'accounts/ali'), account({ konum: '39.9,32.8' })));
+    await assertFails(getDoc(doc(veli(), 'accounts/ali')));
+  });
+
+  it('yönetici hesap kayıtlarını, profilleri ve araçları listeler', async () => {
+    await env.withSecurityRulesDisabled(async (c) => {
+      const f = c.firestore();
+      await setDoc(doc(f, 'accounts/ali'), account());
+      await setDoc(doc(f, 'users/ali'), { name: 'Ali', il: 'Ankara', settings: {}, updated_at: now });
+      await setDoc(doc(f, 'users/ali/vehicle/me'), vehicle());
+    });
+    const db = yonetici();
+    await assertSucceeds(getDocs(collection(db, 'accounts')));
+    await assertSucceeds(getDocs(collection(db, 'users')));
+    await assertSucceeds(getDocs(collectionGroup(db, 'vehicle')));
+  });
+
+  it('yönetici şoförlerin kazanç ve vardiya kayıtlarını OKUYAMAZ, hiçbir şey yazamaz', async () => {
+    await env.withSecurityRulesDisabled(async (c) => {
+      await setDoc(doc(c.firestore(), 'users/ali/entries/e1'), entry());
+      await setDoc(doc(c.firestore(), 'users/ali/shifts/s1'), shift());
+    });
+    const db = yonetici();
+    await assertFails(getDoc(doc(db, 'users/ali/entries/e1')));
+    await assertFails(getDocs(collectionGroup(db, 'entries')));
+    await assertFails(getDoc(doc(db, 'users/ali/shifts/s1')));
+    await assertFails(setDoc(doc(db, 'accounts/ali'), account()));
+    await assertFails(setDoc(doc(db, 'users/ali'), { name: 'X', il: 'Ankara', settings: {}, updated_at: now }));
+  });
+
+  it('başka Google hesabı, doğrulanmamış e-posta ve şoförler paneli okuyamaz', async () => {
+    const baska = env.authenticatedContext('x', { email: 'baska@gmail.com', email_verified: true }).firestore();
+    const dogrulanmamis = env.authenticatedContext('y', { email: ADMIN, email_verified: false }).firestore();
+    for (const db of [baska, dogrulanmamis, aliTel()]) {
+      await assertFails(getDocs(collection(db, 'accounts')));
+      await assertFails(getDocs(collection(db, 'users')));
+      await assertFails(getDocs(collectionGroup(db, 'vehicle')));
+    }
   });
 });
