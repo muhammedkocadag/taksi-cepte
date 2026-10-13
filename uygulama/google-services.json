@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "120994930578",
+    "project_id": "taksi-cepte-9c4ac",
+    "storage_bucket": "taksi-cepte-9c4ac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:120994930578:android:60cb7cc67b7e20e26aeb4b",
+        "android_client_info": {
+          "package_name": "com.kocadag.taksicepte"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsH1x8SLiBmAOKL-xz1OyjW6COv0b22qw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
