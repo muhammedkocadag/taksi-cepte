@@ -94,6 +94,52 @@ Aşama 2'de çökme raporu (Crashlytics vb.) ya da analitik eklenirse bu tablo g
 
 ---
 
+## Google Play Console formları (hazır cevaplar)
+
+Uygulama içeriği (App content) bölümündeki formlar. Cevaplar yasal metinlerle (firebase/web/) ve kodla birebir; biri değişirse diğerini de güncelle.
+
+### Gizlilik politikası
+https://taksi-cepte-9c4ac.web.app/gizlilik
+
+### Uygulama erişimi (App access)
+"Bazı işlevler kısıtlı" → giriş telefon numarası + SMS kodu ister. İnceleme ekibi için Firebase'de **test telefon numarası** tanımlanacak (Authentication → Sign-in method → Phone → Phone numbers for testing; ör. +90 555 000 00 01 / kod 123456, gerçek SMS gitmez) ve buraya yazılacak. Aşama 1 derlemesinde SMS sahte: herhangi bir numara + herhangi 6 rakam.
+
+### Reklamlar
+Hayır, reklam içermiyor.
+
+### İçerik derecelendirmesi
+Kategori: "Yardımcı Program, Üretkenlik, İletişim veya Diğer". Şiddet, cinsellik, kumar, kullanıcılar arası iletişim, konum paylaşımı: hepsi Hayır. Beklenen sonuç: 3+ / Herkes.
+
+### Hedef kitle
+18 yaş ve üstü. Çocuklara yönelik değil.
+
+### Haber uygulaması / COVID / devlet uygulaması
+Hayır.
+
+### Finansal özellikler (Financial features)
+Uygulama para tutmaz, aktarmaz, kredi/yatırım/ödeme hizmeti vermez; sadece kişisel gelir-gider kaydı. "Uygulamam finansal özellik sunmuyor" seçilir (sorulursa "kişisel bütçe/harcama takibi").
+
+### Veri güvenliği (Data safety)
+Genel:
+- Veri topluyor mu / paylaşıyor mu: **Topluyor: Evet. Paylaşıyor: Hayır** (Google Firebase "hizmet sağlayıcı" sayılır, paylaşım değildir).
+- Aktarımda şifreleniyor mu: **Evet** (HTTPS/TLS).
+- Kullanıcı verilerinin silinmesini isteyebilir mi: **Evet** → https://taksi-cepte-9c4ac.web.app/hesap-silme
+- Hesap oluşturma: telefon numarası + SMS kodu ("Kullanıcı adı ve diğer kimlik doğrulama" değil, "Telefon numarası" seçeneği; OAuth yok).
+
+Toplanan veri türleri (hepsi: **zorunlu**, **geçici işleme değil**, amaç kolonuna göre):
+
+| Play kategorisi | Veri türü | Amaç |
+|---|---|---|
+| Kişisel bilgiler | Ad | Uygulama işlevi, Hesap yönetimi |
+| Kişisel bilgiler | Telefon numarası | Hesap yönetimi, Uygulama işlevi, Dolandırıcılık önleme/güvenlik |
+| Kişisel bilgiler | Diğer bilgiler (çalışılan il, araç plakası/modeli) | Uygulama işlevi |
+| Finansal bilgiler | Diğer finansal bilgiler (gelir-gider kayıtları) | Uygulama işlevi |
+| Uygulama etkinliği | Uygulamadaki diğer işlemler (vardiya, ayarlar, zil kurulan etkinlikler) | Uygulama işlevi |
+| Uygulama bilgileri ve performansı | Diğer uygulama performans verileri (cihaz modeli, OS ve uygulama sürümü) | Analiz (toplu sayılar), Hesap yönetimi/destek |
+| Cihaz veya diğer kimlikler | Cihaz veya diğer kimlikler (Firebase kullanıcı kimliği) | Hesap yönetimi, Uygulama işlevi |
+
+Toplanmayan: konum (yaklaşık/kesin), e-posta, kişiler, fotoğraf/video, ses, dosyalar, takvim, web geçmişi, sağlık, mesajlar, ödeme bilgisi (kart), kredi puanı, reklam kimliği, çökme günlükleri (Crashlytics yok; eklenirse güncelle).
+
 ## Ekran görüntüleri planı
 
 Gerekli boyutlar: iPhone 6,9" (1320×2868 veya 1290×2796), Android telefon (en az 1080 genişlik). İlk 3 görsel en önemlisi; arama sonuçlarında görünenler onlar.
