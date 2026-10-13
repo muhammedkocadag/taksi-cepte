@@ -10,7 +10,10 @@ import { BackHeader } from '@/components/ScreenHeader';
 import { Sheet } from '@/components/Sheet';
 import { Button, Field, SheetHeader } from '@/components/ui';
 import { APP_NAME, LEGAL } from '@/lib/brand';
-import { useNotifPermission } from '@/lib/notifications';
+import { cityEvents } from '@/lib/events';
+import { testNotification, useNotifPermission } from '@/lib/notifications';
+import { weeklyDigest } from '@/lib/notifyPlan';
+import { addDays, monday } from '@/lib/period';
 import { useProfile } from '@/store/profile';
 import { useTheme, type ThemeSetting } from '@/theme/ThemeProvider';
 import { fonts, solid, type Palette } from '@/theme/tokens';
@@ -35,6 +38,12 @@ export default function Ayarlar() {
 
   const goalOn = settings.goalOn === '1';
   const on = (key: string) => settings[key] !== '0'; // bildirimler varsayılan açık
+  const tryWeekly = () => {
+    const now = Date.now();
+    const il = profile?.il ?? '';
+    const d = weeklyDigest(cityEvents(now), monday(now), il) ?? weeklyDigest(cityEvents(now), addDays(monday(now), 7), il);
+    if (d) testNotification({ ...d, url: '/etkinlik' });
+  };
 
   return (
     <SafeAreaView style={s.screen} edges={['top']}>
@@ -101,6 +110,14 @@ export default function Ayarlar() {
           <Row icon="wrench" tone={c.orange} bg={c.orangeSoft} title="Muayene ve sigorta" sub="Bitmeden 7 gün önce ve bitiş günü">
             <Toggle value={on('notifMaint')} onChange={(v) => setSetting('notifMaint', v ? '1' : '0')} label="Muayene ve sigorta hatırlatmaları" />
           </Row>
+          <Row icon="cal" tone={c.green} bg={c.greenSoft} title="Haftalık etkinlik özeti" sub="Pazartesi 10:00 · bu hafta neler var">
+            <Toggle value={on('notifWeekly')} onChange={(v) => setSetting('notifWeekly', v ? '1' : '0')} label="Haftalık etkinlik özeti" />
+          </Row>
+          {__DEV__ && (
+            <Pressable onPress={tryWeekly} accessibilityRole="button">
+              <Text style={s.hint}>Geliştirme: haftalık özeti şimdi dene (5 sn sonra gelir)</Text>
+            </Pressable>
+          )}
           {perm.state === 'denied' && (
             <Pressable onPress={perm.fix} style={[s.permWarn, { backgroundColor: c.redSoft }]} accessibilityRole="button">
               <Icon name="belloff" size={20} color={c.red} />

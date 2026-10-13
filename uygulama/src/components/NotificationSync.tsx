@@ -1,7 +1,8 @@
-import { useEffect, useMemo } from 'react';
+import { router } from 'expo-router';
+import { useCallback, useEffect, useMemo } from 'react';
 
-import { cityEvents } from '@/lib/events';
-import { applyPlan } from '@/lib/notifications';
+import { SUPPORTED_CITIES, cityEvents } from '@/lib/events';
+import { applyPlan, useNotificationTaps } from '@/lib/notifications';
 import { plan } from '@/lib/notifyPlan';
 import { useProfile } from '@/store/profile';
 import { useShift } from '@/store/shift';
@@ -20,15 +21,24 @@ export function NotificationSync() {
     try {
       ids = JSON.parse(bells);
     } catch {}
+    const all = SUPPORTED_CITIES.includes(profile.il) ? cityEvents() : [];
     return plan({
       now: Date.now(),
       shiftStart: current?.start ?? null,
       vehicle,
-      events: cityEvents().filter((e) => ids.includes(e.id)),
+      events: all.filter((e) => ids.includes(e.id)),
+      cityEvents: all,
+      city: profile.il,
       notifShift: settings.notifShift !== '0',
       notifMaint: settings.notifMaint !== '0',
+      notifWeekly: settings.notifWeekly !== '0',
     });
-  }, [profile, current?.start, vehicle, bells, settings.notifShift, settings.notifMaint]);
+  }, [profile, current?.start, vehicle, bells, settings.notifShift, settings.notifMaint, settings.notifWeekly]);
+
+  const open = useCallback((url: string) => {
+    if (profile) router.push(url as never);
+  }, [profile]);
+  useNotificationTaps(open);
 
   // Aynı plan tekrar kurulmasın diye anahtar: kimlik + zaman.
   const key = items.map((p) => `${p.id}@${p.at}`).join('|');

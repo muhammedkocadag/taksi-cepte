@@ -1,11 +1,12 @@
 import type { Vehicle } from '@/store/db';
 
 import type { CityEvent } from './events';
-import { addDays } from './period';
+import { addDays, monday } from './period';
 
 // Hangi bildirimin ne zaman çıkacağını hesaplar (saf fonksiyon; telefona kurma işi notifications.ts'te).
 
-export type Planned = { id: string; at: number; title: string; body: string };
+// url: bildirime dokununca açılacak ekran (NotificationSync yönlendirir).
+export type Planned = { id: string; at: number; title: string; body: string; url?: string };
 
 export const OPEN_SHIFT_MS = 14 * 3_600_000;
 const MAINT_DAYS_BEFORE = 7;
@@ -21,8 +22,11 @@ export function plan(input: {
   shiftStart: number | null; // açık vardiyanın başlangıcı
   vehicle: Vehicle | null;
   events: CityEvent[]; // zili açık etkinlikler
+  cityEvents: CityEvent[]; // şehrin bütün etkinlikleri (haftalık özet için)
+  city: string;
   notifShift: boolean;
   notifMaint: boolean;
+  notifWeekly: boolean;
 }): Planned[] {
   const { now, shiftStart, vehicle, events } = input;
   const out: Planned[] = [];
@@ -75,9 +79,37 @@ export function plan(input: {
     });
   }
 
+  // Haftalık özet (Uber'in "Bu hafta neler var"ı gibi): pazartesi 10:00, bu ve sonraki hafta.
+  if (input.notifWeekly)
+    for (const w of [0, 1, 2]) {
+      const start = addDays(monday(now), 7 * w);
+      const digest = weeklyDigest(input.cityEvents, start, input.city);
+      if (digest) out.push({ id: `haftalik-${start}`, at: at(start, WEEKLY_HOUR), url: '/etkinlik', ...digest });
+    }
+
   // Geçmişte kalanlar kurulmaz; aynı anda en fazla 60 (iOS sınırı 64).
   return out
     .filter((p) => p.at > now)
     .sort((a, b) => a.at - b.at)
     .slice(0, 60);
+}
+
+const WEEKLY_HOUR = 10;
+
+// O hafta (pazartesi 10:00'dan pazar sonuna) etkinlik varsa özet bildirimi; yoksa null (bildirim çıkmaz).
+// İçerik bilerek verilmez (kullanıcı istedi): ad ve sayı yok, uygulamaya girip bakması için merak uyandırır.
+export function weeklyDigest(events: CityEvent[], weekStart: number, city: string): { title: string; body: string } | null {
+  const from = at(weekStart, WEEKLY_HOUR);
+  const to = addDays(weekStart, 7);
+  const any = events.some((e) => e.day >= weekStart && e.day < to && at(e.day, 23, 59) >= from);
+  if (!any) return null;
+  return { title: 'Bu hafta neler var', body: `${inCity(city)} bu haftanın en kalabalık etkinliklerini ve çıkış saatlerini gör.` };
+}
+
+// Bulunma eki, ünlü ve ünsüz uyumuyla: Ankara'da, İzmir'de, Muş'ta, Eskişehir'de, Kars'ta.
+export function inCity(city: string) {
+  const vowels = [...city.toLocaleLowerCase('tr')].filter((ch) => 'aeıioöuü'.includes(ch));
+  const back = 'aıou'.includes(vowels.at(-1) ?? 'a');
+  const hard = 'çfhkpsşt'.includes(city.toLocaleLowerCase('tr').at(-1) ?? '');
+  return `${city}'${hard ? 't' : 'd'}${back ? 'a' : 'e'}`;
 }

@@ -40,7 +40,7 @@ export async function applyPlan(items: Planned[]) {
   for (const p of items)
     await Notifications.scheduleNotificationAsync({
       identifier: p.id,
-      content: { title: p.title, body: p.body, sound: true },
+      content: { title: p.title, body: p.body, sound: true, data: p.url ? { url: p.url } : {} },
       trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: new Date(p.at), channelId: CHANNEL },
     });
 }
@@ -72,4 +72,37 @@ export function useNotifPermission() {
   }, [refresh]);
 
   return { state, fix };
+}
+
+// Bildirime dokununca `data.url` ekranını açar (uygulama kapalıyken dokunulduysa açılışta da).
+// Her dokunuş bir kez işlenir: "son dokunulan bildirim" sonraki açılışlarda da döndüğü için.
+const handledTaps = new Set<string>();
+
+export function useNotificationTaps(open: (url: string) => void) {
+  useEffect(() => {
+    if (!Notifications) return;
+    const handle = (r: import('expo-notifications').NotificationResponse | null) => {
+      if (!r) return;
+      const key = `${r.notification.request.identifier}@${r.notification.date}`;
+      if (handledTaps.has(key)) return;
+      handledTaps.add(key);
+      const url = r.notification.request.content.data?.url;
+      if (typeof url === 'string') open(url);
+    };
+    Notifications.getLastNotificationResponseAsync().then(handle).catch(() => {});
+    const sub = Notifications.addNotificationResponseReceivedListener(handle);
+    return () => sub.remove();
+  }, [open]);
+}
+
+// Sadece geliştirme: bir bildirimi 5 sn sonra gösterir (Ayarlar'daki deneme satırı). Planlı bildirimlere dokunmaz.
+export async function testNotification(p: { title: string; body: string; url?: string }) {
+  if (!Notifications) return;
+  let perm = await Notifications.getPermissionsAsync();
+  if (!perm.granted && perm.canAskAgain) perm = await Notifications.requestPermissionsAsync();
+  if (!perm.granted) return;
+  await Notifications.scheduleNotificationAsync({
+    content: { title: p.title, body: p.body, sound: true, data: p.url ? { url: p.url } : {} },
+    trigger: { type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL, seconds: 5, channelId: CHANNEL },
+  });
 }
