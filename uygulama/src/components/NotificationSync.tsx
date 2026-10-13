@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 
-import { sampleEvents } from '@/lib/events';
+import { cityEvents } from '@/lib/events';
 import { applyPlan } from '@/lib/notifications';
 import { plan } from '@/lib/notifyPlan';
 import { useProfile } from '@/store/profile';
@@ -24,7 +24,7 @@ export function NotificationSync() {
       now: Date.now(),
       shiftStart: current?.start ?? null,
       vehicle,
-      events: sampleEvents().filter((e) => ids.includes(e.id)),
+      events: cityEvents().filter((e) => ids.includes(e.id)),
       notifShift: settings.notifShift !== '0',
       notifMaint: settings.notifMaint !== '0',
     });

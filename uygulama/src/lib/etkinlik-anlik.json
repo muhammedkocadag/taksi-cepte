@@ -1,0 +1,293 @@
+{
+ "alindi": 1791879258628,
+ "etkinlikler": [
+  {
+   "id": "20261013-o-m-g",
+   "cat": "Etkinlik",
+   "title": "O.M.G",
+   "venue": "Ve Sahne Panora",
+   "start": 1791910800000,
+   "end": 1791921600000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261014-congresium",
+   "cat": "Fuar",
+   "title": "VEF GLOBAL EDUCATION FAIR – ANKARA 2026",
+   "venue": "ATO Congresium",
+   "start": 1791968400000,
+   "end": 1791990000000,
+   "demand": "yuksek"
+  },
+  {
+   "id": "20261014-aktepe",
+   "cat": "Futbol",
+   "title": "Keçiörengücü - Alagöz Holding Iğdır",
+   "venue": "Aktepe Stadyumu, Keçiören",
+   "start": 1791997200000,
+   "end": 1792004400000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261014-cso-tarihi",
+   "cat": "Etkinlik",
+   "title": "Melihat Gülses Özel Konseri - Geçmişten Günümüze Gönül Şarkıları",
+   "venue": "CSO Tarihi Salon",
+   "start": 1791997200000,
+   "end": 1792008000000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261016-ellen-allien",
+   "cat": "Konser",
+   "title": "Ellen Allien",
+   "venue": "Kite",
+   "start": 1792180800000,
+   "end": 1792191600000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261017-eryaman",
+   "cat": "Futbol",
+   "title": "Gençlerbirliği - Galatasaray",
+   "venue": "Eryaman Stadyumu",
+   "start": 1792242000000,
+   "end": 1792249200000,
+   "demand": "cokYuksek"
+  },
+  {
+   "id": "20261017-baskent-voleybol",
+   "cat": "Voleybol",
+   "title": "Halkbank Ankara - Galatasaray Volleyball",
+   "venue": "Başkent Voleybol Salonu",
+   "start": 1792242000000,
+   "end": 1792249200000,
+   "demand": "yuksek"
+  },
+  {
+   "id": "20261017-ankara-spor-salonu",
+   "cat": "Basketbol",
+   "title": "Ankara DSİ - Konya BBSK",
+   "venue": "Ankara Spor Salonu",
+   "start": 1792249200000,
+   "end": 1792256400000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261017-murat-uncuoglu",
+   "cat": "Etkinlik",
+   "title": "Murat Uncuoglu",
+   "venue": "Backyard Secrets",
+   "start": 1792269000000,
+   "end": 1792279800000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261019-misra",
+   "cat": "Etkinlik",
+   "title": "Mısra",
+   "venue": "AES Sanat Tiyatrosu",
+   "start": 1792429200000,
+   "end": 1792440000000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261021-sheraton",
+   "cat": "Fuar",
+   "title": "Fall Turkey Fairs",
+   "venue": "Sheraton Ankara Kongre Merkezi",
+   "start": 1792566000000,
+   "end": 1792594800000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261023-karm6",
+   "cat": "Konser",
+   "title": "KARM6",
+   "venue": "Atılım Üniversitesi Amfi Tiyatro",
+   "start": 1792776600000,
+   "end": 1792787400000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261024-ankara-demirspor-ekinciler-iskenderunspo",
+   "cat": "Futbol",
+   "title": "Ankara Demirspor - Ekinciler İskenderunspor",
+   "venue": "Etimesgut Belediyesi Atatürk Stadı",
+   "start": 1792841400000,
+   "end": 1792848600000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261024-ankaraspor-gmg-kastamonuspor",
+   "cat": "Futbol",
+   "title": "Ankaraspor - GMG Kastamonuspor",
+   "venue": "Sincan 15 Temmuz Milli Birlik Stadı",
+   "start": 1792841400000,
+   "end": 1792848600000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261024-eryaman",
+   "cat": "Futbol",
+   "title": "Ankaragücü - KCT 1461 Trabzon",
+   "venue": "Eryaman Stadyumu",
+   "start": 1792857600000,
+   "end": 1792864800000,
+   "demand": "cokYuksek"
+  },
+  {
+   "id": "20261025-aktepe",
+   "cat": "Futbol",
+   "title": "Keçiörengücü - Bursaspor",
+   "venue": "Aktepe Stadyumu, Keçiören",
+   "start": 1792944000000,
+   "end": 1792951200000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261028-albert-camus",
+   "cat": "Konser",
+   "title": "Albert Camus",
+   "venue": "Arcadium Actor Studio Sahnesi",
+   "start": 1793206800000,
+   "end": 1793217600000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261028-milyon",
+   "cat": "Konser",
+   "title": "Ahmediyar",
+   "venue": "Milyon Performance Hall",
+   "start": 1793210400000,
+   "end": 1793221200000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261029-cumhuriyet-bayrami",
+   "cat": "Resmi tören",
+   "title": "Cumhuriyet Bayramı",
+   "venue": "Anıtkabir ve Kızılay çevresi",
+   "start": 1793253600000,
+   "end": 1793286000000,
+   "demand": "yuksek"
+  },
+  {
+   "id": "20261102-eryaman",
+   "cat": "Futbol",
+   "title": "Gençlerbirliği - Corendon Alanyaspor",
+   "venue": "Eryaman Stadyumu",
+   "start": 1793638800000,
+   "end": 1793646000000,
+   "demand": "cokYuksek"
+  },
+  {
+   "id": "20261104-ankara-arena",
+   "cat": "Basketbol",
+   "title": "Turk Telekom vs Fraport Skyliners Frankfurt",
+   "venue": "Ankara Arena",
+   "start": 1793809800000,
+   "end": 1793817000000,
+   "demand": "yuksek"
+  },
+  {
+   "id": "20261106-cso-ada",
+   "cat": "Etkinlik",
+   "title": "Candles and Echoes: Golden Swan",
+   "venue": "CSO Ada Ankara",
+   "start": 1793986200000,
+   "end": 1793997000000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261106-sansar-salvo-social-street",
+   "cat": "Konser",
+   "title": "Sansar Salvo @ Social Street",
+   "venue": "Social Street",
+   "start": 1793988000000,
+   "end": 1793998800000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261108-jolly-joker",
+   "cat": "Konser",
+   "title": "Simge",
+   "venue": "Jolly Joker, Kavaklıdere",
+   "start": 1794157200000,
+   "end": 1794168000000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261113-the-illusionist-enver-ertas",
+   "cat": "Konser",
+   "title": "The Illusionist - Enver Ertaş",
+   "venue": "Panora Rossetti",
+   "start": 1794589200000,
+   "end": 1794600000000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261114-candlelight-tarkan-saygi-gecesi-in-ankar",
+   "cat": "Etkinlik",
+   "title": "Candlelight: Tarkan Saygı Gecesi in Ankara",
+   "venue": "Intercontinental Grand Ankara Hotel",
+   "start": 1794668400000,
+   "end": 1794679200000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261116-milyon",
+   "cat": "Konser",
+   "title": "Paradise Lost",
+   "venue": "Milyon Performance Hall",
+   "start": 1794844800000,
+   "end": 1794855600000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261125-milyon",
+   "cat": "Konser",
+   "title": "Gece Yolcuları",
+   "venue": "Milyon Performance Hall",
+   "start": 1795629600000,
+   "end": 1795640400000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261126-ankara-dance-festival",
+   "cat": "Festival",
+   "title": "Ankara Dance Festival",
+   "venue": "The Green Park Hotel Ankara",
+   "start": 1795683600000,
+   "end": 1795694400000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261128-milyon",
+   "cat": "Konser",
+   "title": "Uzi",
+   "venue": "Milyon Performance Hall",
+   "start": 1795890600000,
+   "end": 1795901400000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261129-jolly-joker",
+   "cat": "Konser",
+   "title": "Jolly Joker",
+   "venue": "Jolly Joker, Kavaklıdere",
+   "start": 1795968000000,
+   "end": 1795978800000,
+   "demand": "orta"
+  },
+  {
+   "id": "20261209-jolly-joker",
+   "cat": "Konser",
+   "title": "Kovacs",
+   "venue": "Jolly Joker, Kavaklıdere",
+   "start": 1796835600000,
+   "end": 1796846400000,
+   "demand": "orta"
+  }
+ ]
+}

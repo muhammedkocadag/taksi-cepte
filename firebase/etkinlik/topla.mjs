@@ -73,6 +73,14 @@ if (/[\\/]etkinlik[\\/]topla\.mjs$/.test(process.argv[1] ?? '')) {
       console.log(`${fmt(e.start)}–${fmt(e.end).slice(6)}  ${e.cat.padEnd(11)} ${e.demand.padEnd(9)} ${e.title} · ${e.venue}  [${e.source}]`);
     console.log('\nKaynaklar:', JSON.stringify(rapor));
   }
+  // Expo Go'da Firestore yok: bugünkü listeyi uygulamanın içine anlık görüntü olarak koy (src/lib/events.ts okur).
+  if (args.has('--uygulama')) {
+    const { writeFileSync } = await import('node:fs');
+    const yol = new URL('../../uygulama/src/lib/etkinlik-anlik.json', import.meta.url);
+    const etkinlikler = liste.map(({ id, cat, title, venue, start, end, demand }) => ({ id, cat, title, venue, start, end, demand }));
+    writeFileSync(yol, JSON.stringify({ alindi: Date.now(), etkinlikler }, null, 1) + '\n');
+    console.log(`Uygulamaya yazıldı: ${etkinlikler.length} etkinlik`);
+  }
   if (args.has('--yaz')) {
     const { initializeApp, applicationDefault } = await import('firebase-admin/app');
     const { getFirestore } = await import('firebase-admin/firestore');

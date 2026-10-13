@@ -7,7 +7,7 @@ import { Backdrop } from '@/components/Backdrop';
 import { Icon } from '@/components/Icon';
 import { useTabBarSpace } from '@/components/TabBar';
 import { TopBlur, useScrollY } from '@/components/TopBlur';
-import { DEMAND_LABEL, SUPPORTED_CITIES, sampleEvents, type CityEvent, type Demand } from '@/lib/events';
+import { DEMAND_LABEL, EVENTS_FETCHED_AT, SUPPORTED_CITIES, cityEvents, type CityEvent, type Demand } from '@/lib/events';
 import { MONTHS, addDays, dayDiff, monday, startOfDay } from '@/lib/period';
 import { useProfile } from '@/store/profile';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -51,8 +51,9 @@ export default function Etkinlik() {
     hafta: addDays(monday(t0), 7),
     ay: new Date(n.getFullYear(), n.getMonth() + 1, 1).getTime(),
   }[tab];
-  const list = sampleEvents(now)
-    .filter((e) => e.day >= t0 && e.day < limit)
+  // Bitmemiş olanlar; dün başlayıp süren (gece yarısını geçen konser) "Bugün" sayılır.
+  const list = cityEvents(now)
+    .filter((e) => e.day < limit)
     .sort((a, b) => a.day - b.day || a.start.localeCompare(b.start));
   const supported = SUPPORTED_CITIES.includes(il);
 
@@ -97,13 +98,15 @@ export default function Etkinlik() {
         ) : (
           <>
             {list.map((e, i) => (
-              <EventRow key={e.id} e={e} days={dayDiff(e.day, t0)} bell={bells.includes(e.id)} onBell={() => toggleBell(e.id)} last={i === list.length - 1} />
+              <EventRow key={e.id} e={e} days={Math.max(0, dayDiff(e.day, t0))} bell={bells.includes(e.id)} onBell={() => toggleBell(e.id)} last={i === list.length - 1} />
             ))}
             <View style={s.footer}>
               <Icon name="bell" size={14} color={c.faint} />
               <Text style={s.footText}>Zil açıksa 1 gün önce ve etkinlik günü hatırlatılır.</Text>
             </View>
-            <Text style={s.sample}>Deneme sürümü: gösterilen etkinlikler örnektir.</Text>
+            <Text style={s.sample}>
+              Deneme sürümü: {new Date(EVENTS_FETCHED_AT).getDate()} {MONTHS[new Date(EVENTS_FETCHED_AT).getMonth()]} tarihli liste.
+            </Text>
           </>
         )}
       </Animated.ScrollView>
