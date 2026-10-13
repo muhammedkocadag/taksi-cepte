@@ -5,6 +5,7 @@
 # Elle çalıştırma: Actions → Etkinlikler → Run workflow (her çalıştırma SerpApi kotasından ~5 arama yer).
 # Not: GitHub, depoda 60 gün hiç değişiklik olmazsa zamanlanmış görevleri durdurur.
 name: Etkinlikler
+run-name: Etkinlikleri topla (${{ github.event_name == 'schedule' && 'gece' || 'elle' }})
 
 on:
   schedule:
