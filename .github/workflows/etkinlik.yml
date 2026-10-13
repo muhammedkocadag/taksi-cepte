@@ -1,0 +1,51 @@
+# Her gece Ankara etkinliklerini toplayıp Firestore `events` koleksiyonuna yazar (firebase/etkinlik/).
+# Gizli bilgiler GitHub → Settings → Secrets and variables → Actions:
+#   FIREBASE_SERVICE_ACCOUNT  sadece "Cloud Datastore User" yetkili servis hesabının JSON anahtarı
+#   SERPAPI_KEY, APISPORTS_KEY
+# Elle çalıştırma: Actions → Etkinlikler → Run workflow (her çalıştırma SerpApi kotasından ~5 arama yer).
+# Not: GitHub, depoda 60 gün hiç değişiklik olmazsa zamanlanmış görevleri durdurur.
+name: Etkinlikler
+
+on:
+  schedule:
+    - cron: '30 0 * * *' # 00:30 UTC = 03:30 Türkiye (GitHub birkaç dakika geciktirebilir)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: etkinlik
+  cancel-in-progress: false
+
+jobs:
+  topla:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: firebase
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: firebase/package-lock.json
+
+      # Sadece çalışma için gerekenler (firebase-admin); emülatör ve test araçları kurulmaz.
+      - run: npm ci --omit=dev --ignore-scripts
+
+      # Ayrıştırıcılar kaydedilmiş sayfalarla hâlâ doğru mu (ağsız).
+      - run: node --test test/etkinlik.test.mjs
+
+      - name: Topla ve Firestore'a yaz
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+        run: |
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/sa.json"
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" node etkinlik/topla.mjs --yaz
+          rm -f "$RUNNER_TEMP/sa.json"

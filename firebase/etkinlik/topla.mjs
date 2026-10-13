@@ -88,5 +88,9 @@ if (/[\\/]etkinlik[\\/]topla\.mjs$/.test(process.argv[1] ?? '')) {
     initializeApp(emu ? { projectId: 'demo-taksi-cepte' } : { credential: applicationDefault(), projectId: 'taksi-cepte-9c4ac' });
     console.log('Firestore:', await yaz(getFirestore(), liste, rapor));
   }
-  if (Object.values(rapor).every((r) => r.hata)) process.exit(1);
+  // Gece görevi (GitHub Actions) için: her kaynak hatası uyarı olarak görünür; TFF (ana maç kaynağı) ya da bütün
+  // kaynaklar hata verdiyse görev başarısız sayılır ve GitHub e-posta atar. Diğerleri tek tük zaman aşımına uğrayabilir.
+  const hatalar = Object.entries(rapor).filter(([, r]) => r.hata);
+  for (const [ad, r] of hatalar) console.log(`::warning title=${ad} kaynağı hata verdi::${r.hata}`);
+  if (rapor.tff?.hata || hatalar.length === Object.keys(rapor).length) process.exit(1);
 }
