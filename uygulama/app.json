@@ -61,7 +61,8 @@
             "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "scheme": "taksicepte",
     "extra": {

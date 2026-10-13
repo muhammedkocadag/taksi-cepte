@@ -1,5 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
+import { openBrowserAsync } from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,7 +12,7 @@ import { IlPicker } from '@/components/IlPicker';
 import { Logo } from '@/components/Logo';
 import { Sheet } from '@/components/Sheet';
 import { Button, Field, PickBox } from '@/components/ui';
-import { APP_NAME, TAGLINE } from '@/lib/brand';
+import { APP_NAME, LEGAL, TAGLINE } from '@/lib/brand';
 import { formatPlate, plateOk } from '@/lib/data';
 import { useProfile } from '@/store/profile';
 import { useVehicle } from '@/store/vehicle';
@@ -93,8 +94,16 @@ function PhoneStep({ phone, setPhone, onNext }: { phone: string; setPhone: (v: s
         <Button label="Devam et" icon="right" iconAfter onPress={onNext} disabled={!ok} />
       </View>
       <Text style={s.legal}>
-        Devam ederek <Text style={s.legalLink}>Kullanım Koşulları</Text>'nı ve <Text style={s.legalLink}>Aydınlatma Metni</Text>'ni kabul
-        etmiş olursun.
+        {/* Aydınlatma metni "kabul edilmez", okunur (KVKK md. 10 bilgilendirme yükümlülüğü). */}
+        Devam ederek{' '}
+        <Text style={s.legalLink} onPress={() => openBrowserAsync(LEGAL.kosullar)} accessibilityRole="link">
+          Kullanım Koşulları
+        </Text>
+        'nı kabul etmiş ve{' '}
+        <Text style={s.legalLink} onPress={() => openBrowserAsync(LEGAL.kvkk)} accessibilityRole="link">
+          KVKK Aydınlatma Metni
+        </Text>
+        'ni okumuş olursun.
       </Text>
     </>
   );

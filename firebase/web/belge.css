@@ -1,0 +1,38 @@
+/* Taksi Cepte yasal sayfaları (KVKK, gizlilik, koşullar, hesap silme). Sade, okunur, telefonda rahat. */
+:root {
+  --bg: #ffffff; --text: #1c1c1e; --muted: #5f5f66; --line: #e5e5ea; --accent: #b45309; --mark: #fef08a;
+  --card: #f5f5f7;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #000; --text: #f5f5f7; --muted: #a1a1a6; --line: #2c2c2e; --accent: #facc15; --mark: #854d0e; --card: #1c1c1e; }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 760px; margin: 0 auto; padding: 28px 16px 64px; }
+header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+header img { width: 32px; height: 32px; border-radius: 8px; }
+header a { color: var(--text); text-decoration: none; font-weight: 700; }
+h1 { font-size: 26px; line-height: 1.25; margin: 20px 0 4px; letter-spacing: -0.3px; }
+h2 { font-size: 19px; margin: 32px 0 8px; }
+h3 { font-size: 16px; margin: 20px 0 6px; }
+.tarih { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+a { color: var(--accent); }
+ul, ol { padding-left: 22px; }
+li { margin: 4px 0; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 15px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 600; font-size: 13.5px; }
+.kutu { background: var(--card); border-radius: 14px; padding: 14px 16px; margin: 16px 0; }
+mark.eksik { background: var(--mark); color: inherit; padding: 0 4px; border-radius: 4px; }
+nav.belgeler { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 14.5px; color: var(--muted); }
+nav.belgeler a { margin-right: 14px; }
+@media (max-width: 560px) {
+  table, thead, tbody, tr, th, td { display: block; }
+  thead { display: none; }
+  tr { padding: 8px 0; border-bottom: 1px solid var(--line); }
+  td { border: 0; padding: 2px 0; }
+  td:first-child { font-weight: 600; }
+}

@@ -1,4 +1,4 @@
-// Taksi Cepte yönetim paneli. Firebase Hosting'de yayınlanır (firebase/ içinde `npm run deploy:panel`).
+// Taksi Cepte yönetim paneli. Firebase Hosting.de /panel adresinde yayınlanır (firebase/ içinde `npm run deploy:panel`).
 // Yetki SUNUCUDA: firestore.rules → isAdmin(). Bu sayfa sadece okur; kazanç ve vardiya kayıtlarına kurallar izin vermez.
 // localhost'ta emülatöre bağlanır (`npm run panel:emulator`, sahte veri: ornek-veri.mjs).
 // Şoförlerin yazdığı metinler sayfaya sadece textContent ile basılır (innerHTML yok).

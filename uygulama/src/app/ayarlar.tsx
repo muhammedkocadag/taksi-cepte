@@ -1,3 +1,4 @@
+import { openBrowserAsync } from 'expo-web-browser';
 import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,7 +9,7 @@ import { IlPicker } from '@/components/IlPicker';
 import { BackHeader } from '@/components/ScreenHeader';
 import { Sheet } from '@/components/Sheet';
 import { Button, Field, SheetHeader } from '@/components/ui';
-import { APP_NAME } from '@/lib/brand';
+import { APP_NAME, LEGAL } from '@/lib/brand';
 import { useNotifPermission } from '@/lib/notifications';
 import { useProfile } from '@/store/profile';
 import { useTheme, type ThemeSetting } from '@/theme/ThemeProvider';
@@ -142,6 +143,13 @@ export default function Ayarlar() {
         <Text style={s.version}>
           {APP_NAME.join(' ')} · Sürüm 0.1
         </Text>
+        <Text style={s.links}>
+          <Text onPress={() => openBrowserAsync(LEGAL.gizlilik)} accessibilityRole="link">Gizlilik</Text>
+          {'  ·  '}
+          <Text onPress={() => openBrowserAsync(LEGAL.kvkk)} accessibilityRole="link">KVKK</Text>
+          {'  ·  '}
+          <Text onPress={() => openBrowserAsync(LEGAL.kosullar)} accessibilityRole="link">Kullanım Koşulları</Text>
+        </Text>
       </ScrollView>
 
       <Sheet visible={sheet === 'name'} onClose={close}>
@@ -264,6 +272,7 @@ const styles = (c: Palette) =>
     goalCur: { ...fonts.numHeavy, fontSize: 18, color: c.muted },
     goalInput: { flex: 1, ...fonts.numHeavy, fontSize: 20, color: c.text, paddingVertical: 4, textAlign: 'right' },
     version: { ...fonts.ui, fontSize: 13, color: c.faint, textAlign: 'center', marginTop: 8 },
+    links: { ...fonts.uiSemi, fontSize: 13, color: c.muted, textAlign: 'center', marginTop: 10, lineHeight: 22 },
     buttons: { flexDirection: 'row', gap: 10 },
     permWarn: { flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 12, marginTop: 8 },
     permText: { flex: 1, ...fonts.uiBold, fontSize: 14, lineHeight: 20 },

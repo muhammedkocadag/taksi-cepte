@@ -1,7 +1,12 @@
 # Taksi Cepte — mağaza metinleri
 
 App Store Connect ve Google Play Console'a yüklenecek metinler. Karakter sınırları ölçüldü.
-Yayından önce: gizlilik politikası bağlantısı (KVKK metinleri, hukukçu kontrolü), destek e-postası ve ekran görüntüleri hazır olmalı.
+Yayından önce: destek e-postası ve ekran görüntüleri hazır olmalı; yasal metinler hukukçu kontrolünden geçmeli.
+
+Mağaza formlarına girilecek adresler:
+- Gizlilik politikası (App Store + Google Play): https://taksi-cepte-9c4ac.web.app/gizlilik
+- Hesap silme (Google Play → Veri güvenliği): https://taksi-cepte-9c4ac.web.app/hesap-silme
+- Destek / pazarlama sitesi: https://taksi-cepte-9c4ac.web.app
 
 ---
 
