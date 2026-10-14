@@ -12,7 +12,20 @@
           "package_name": "com.kocadag.taksicepte"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "120994930578-8dsquncf7cfpqj9fcmqced7evcd2mlu6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kocadag.taksicepte",
+            "certificate_hash": "b96a5b03ec1df19b2e0da004a80c27dd4e2030cf"
+          }
+        },
+        {
+          "client_id": "120994930578-cha7e79ip94k424so34a9mgj9cg8bebd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCsH1x8SLiBmAOKL-xz1OyjW6COv0b22qw"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "120994930578-cha7e79ip94k424so34a9mgj9cg8bebd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "120994930578-3qhqdojm93uqh0fc7ul652h968kmvdqb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.kocadag.taksicepte"
+              }
+            }
+          ]
         }
       }
     }

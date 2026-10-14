@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { CloudSync } from '@/components/CloudSync';
 import { NotificationSync } from '@/components/NotificationSync';
 import { migrate } from '@/store/db';
 import { ProfileProvider, useProfile } from '@/store/profile';
@@ -18,6 +19,7 @@ function Screens() {
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <NotificationSync />
+      <CloudSync />
       {/* Zemin opak; ışıklı zemin (Backdrop) her ekranın kendi içinde çizilir. iOS, saydam ekranların
           arkasına kendi (açık modda beyaz) zeminini koyduğu için saydamlığa güvenilmez. */}
       <Stack

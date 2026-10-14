@@ -138,7 +138,10 @@ service cloud.firestore {
       }
 
       match /vehicle/{id} {
-        allow read, delete: if isOwner(uid) && id == 'me';
+        // list: eşitleme koleksiyonu sorguyla okur ("updated_at > x"); sorguda belge adı kuralla kanıtlanamadığı
+        // için id == 'me' şartı list'e konamaz (konursa sorgu tümden reddedilir). Yazma yine sadece 'me'.
+        allow get, delete: if isOwner(uid) && id == 'me';
+        allow list: if isOwner(uid);
         allow create: if isOwner(uid) && id == 'me' && validVehicle(request.resource.data);
         allow update: if isOwner(uid) && id == 'me' && validVehicle(request.resource.data) && notOlder();
       }

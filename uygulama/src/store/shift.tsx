@@ -1,7 +1,8 @@
 import { useSQLiteContext } from 'expo-sqlite';
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { deleteEntryRow, loadShifts, saveEntry, saveShift } from './db';
+import { useProfile } from './profile';
 
 // Kayıtlar telefon içindeki SQLite veritabanında kalıcı. Firebase gelince buluta eşitlenecek.
 
@@ -61,6 +62,19 @@ export function ShiftProvider({ children }: { children: ReactNode }) {
   const [initial] = useState(() => loadShifts(db));
   const [current, setCurrent] = useState<Shift | null>(() => initial.find((s) => s.end === null) ?? null);
   const [past, setPast] = useState<Shift[]>(() => initial.filter((s) => s.end !== null));
+
+  // Buluttan yeni veri gelince (dataVersion artar) veritabanından yeniden okunur.
+  const { dataVersion } = useProfile();
+  const firstLoad = useRef(true);
+  useEffect(() => {
+    if (firstLoad.current) {
+      firstLoad.current = false;
+      return;
+    }
+    const all = loadShifts(db);
+    setCurrent(all.find((s) => s.end === null) ?? null);
+    setPast(all.filter((s) => s.end !== null));
+  }, [dataVersion, db]);
 
   const startShift = useCallback(() => {
     if (current) return;

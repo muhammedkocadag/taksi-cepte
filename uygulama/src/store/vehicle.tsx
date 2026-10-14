@@ -1,7 +1,8 @@
 import { useSQLiteContext } from 'expo-sqlite';
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { loadVehicle, saveVehicle, type Vehicle } from './db';
+import { useProfile } from './profile';
 
 export type { Vehicle };
 
@@ -17,6 +18,17 @@ const VehicleContext = createContext<VehicleValue | null>(null);
 export function VehicleProvider({ children }: { children: ReactNode }) {
   const db = useSQLiteContext();
   const [vehicle, setVehicle] = useState<Vehicle | null>(() => loadVehicle(db));
+
+  // Buluttan yeni veri gelince (dataVersion artar) veritabanından yeniden okunur.
+  const { dataVersion } = useProfile();
+  const firstLoad = useRef(true);
+  useEffect(() => {
+    if (firstLoad.current) {
+      firstLoad.current = false;
+      return;
+    }
+    setVehicle(loadVehicle(db));
+  }, [dataVersion, db]);
 
   const save = useCallback(
     (v: Vehicle) => {

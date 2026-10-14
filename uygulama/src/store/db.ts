@@ -63,7 +63,8 @@ export function migrate(db: SQLiteDatabase) {
 
 // Hesap silme: telefondaki bütün kayıtlar gerçekten silinir (Firebase gelince buluttakiler de).
 export function wipeAll(db: SQLiteDatabase) {
-  db.execSync('DELETE FROM entries; DELETE FROM shifts; DELETE FROM vehicle; DELETE FROM settings;');
+  // smsLog (SMS isteme sınırı, src/lib/smsLimit.ts) cihaza aittir: çıkışta ve hesap silmede sıfırlanmaz.
+  db.execSync("DELETE FROM entries; DELETE FROM shifts; DELETE FROM vehicle; DELETE FROM settings WHERE key <> 'smsLog';");
 }
 
 export function loadSettings(db: SQLiteDatabase): Record<string, string> {

@@ -10,7 +10,8 @@
     "etkinlik:emulator": "firebase emulators:exec --only firestore --project demo-taksi-cepte \"node --env-file-if-exists=.env etkinlik/topla.mjs --yaz && node --env-file-if-exists=.env etkinlik/topla.mjs --yaz\"",
     "panel:emulator": "firebase emulators:start --only auth,firestore,hosting --project demo-taksi-cepte",
     "panel:ornek": "node test/panel-ornek-veri.mjs",
-    "deploy:panel": "firebase deploy --only hosting --project taksi-cepte-9c4ac"
+    "deploy:panel": "firebase deploy --only hosting --project taksi-cepte-9c4ac",
+    "test:functions": "firebase emulators:exec --only auth,firestore,functions --project demo-taksi-cepte \"node --test test/functions.test.mjs\""
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^4.0.1",

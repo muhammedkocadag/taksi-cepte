@@ -7,6 +7,7 @@ import {
   query,
   setDoc,
   where,
+  writeBatch,
 } from '@react-native-firebase/firestore';
 
 import type { DeviceInfo } from '@/lib/deviceInfo';
@@ -89,3 +90,24 @@ export async function touchAccount(uid: string, phone: string, info: DeviceInfo,
   if (old && now - old.last_seen < SEEN_EVERY_MS && old.app === info.app && old.os === info.os) return;
   await withTimeout(setDoc(ref, { phone, ...info, created_at: old?.created_at ?? now, last_seen: now }));
 }
+
+// Hesap silme, sunucu fonksiyonu yokken (fatura hesabı kapalı: Cloud Functions çalışmaz) uygulamanın kendisinden:
+// kurallar sahibine kendi belgelerini silme izni veriyor. Önce alt koleksiyonlar, sonra profil ve panel kaydı.
+// Firebase hesabının kendisi authFirebase.deleteUser ile silinir (yakın zamanda giriş yapılmamışsa Firebase reddeder).
+export async function deleteMyData(uid: string) {
+  const db = getFirestore();
+  for (const t of ['entries', 'shifts', 'vehicle'] as Table[]) {
+    const snap = await withTimeout(getDocsFromServer(col(db, uid, t)));
+    for (let i = 0; i < snap.docs.length; i += 400) {
+      const batch = writeBatch(db);
+      for (const d of snap.docs.slice(i, i + 400)) batch.delete(d.ref);
+      await withTimeout(batch.commit());
+    }
+  }
+  const batch = writeBatch(db);
+  batch.delete(doc(db, 'accounts', uid));
+  batch.delete(doc(db, 'users', uid));
+  await withTimeout(batch.commit());
+}
+
+const col = (db: ReturnType<typeof getFirestore>, uid: string, t: Table) => collection(db, 'users', uid, t);

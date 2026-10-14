@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { after, before, beforeEach, describe, it } from 'node:test';
 
 import { assertFails, assertSucceeds, initializeTestEnvironment } from '@firebase/rules-unit-testing';
-import { collection, collectionGroup, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc } from 'firebase/firestore';
+import { collection, collectionGroup, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where } from 'firebase/firestore';
 
 let env;
 const now = Date.now();
@@ -55,6 +55,20 @@ describe('kendi verisi', () => {
     const db = ali();
     await setDoc(doc(db, 'users/ali/entries/e1'), entry());
     await assertSucceeds(deleteDoc(doc(db, 'users/ali/entries/e1')));
+  });
+});
+
+describe('eşitleme sorguları (uygulamanın yaptığı gibi)', () => {
+  it('sahibi kendi vardiya, kayıt ve araç koleksiyonlarını "updated_at > x" sorgusuyla okur', async () => {
+    const db = ali();
+    await setDoc(doc(db, 'users/ali/vehicle/me'), vehicle());
+    for (const t of ['shifts', 'entries', 'vehicle'])
+      await assertSucceeds(getDocs(query(collection(db, `users/ali/${t}`), where('updated_at', '>', 0))));
+    await assertSucceeds(getDoc(doc(db, 'users/ali')));
+  });
+  it('başkası aynı sorguyu yapamaz', async () => {
+    for (const t of ['shifts', 'entries', 'vehicle'])
+      await assertFails(getDocs(query(collection(veli(), `users/ali/${t}`), where('updated_at', '>', 0))));
   });
 });
 

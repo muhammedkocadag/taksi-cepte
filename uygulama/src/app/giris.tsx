@@ -1,7 +1,8 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
+import { useSQLiteContext } from 'expo-sqlite';
 import { openBrowserAsync } from 'expo-web-browser';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -12,18 +13,22 @@ import { IlPicker } from '@/components/IlPicker';
 import { Logo } from '@/components/Logo';
 import { Sheet } from '@/components/Sheet';
 import { Button, Field, PickBox } from '@/components/ui';
+import { authErrorText, cloudEnabled, confirmCode, currentUser, onUser, sendCode, type AuthUser } from '@/lib/auth';
 import { APP_NAME, LEGAL, TAGLINE } from '@/lib/brand';
+import { recordSms, smsStatus } from '@/lib/smsLimit';
 import { formatPlate, plateExample as examplePlate, plateOk } from '@/lib/data';
+import { restoreAfterSignIn } from '@/store/account';
+import { loadSettings } from '@/store/db';
 import { useProfile } from '@/store/profile';
 import { useVehicle } from '@/store/vehicle';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, solid, type Palette } from '@/theme/tokens';
 
 // Kayıt ve giriş aynı akış: telefon → SMS kodu → (yeni kullanıcıysa) "Son bir adım".
-// Aşama 1: SMS gönderilmiyor, herhangi 6 rakam kabul ediliyor. Firebase gelince gerçek doğrulama.
+// Gerçek derlemede Firebase SMS'i (src/lib/auth.ts); doğrulanınca buluttaki kayıtlar indirilir ve profili tam olan
+// şoför doğrudan ana sayfaya geçer. Expo Go'da SMS gönderilmez, herhangi 6 rakam kabul edilir.
 
 type Step = 'phone' | 'code' | 'profile';
-const RESEND_S = 60;
 
 const fmtPhone = (d: string) => [d.slice(0, 3), d.slice(3, 6), d.slice(6, 8), d.slice(8, 10)].filter(Boolean).join(' ');
 const phoneErr = (d: string) => (d.length && d[0] !== '5' ? 'Cep numarası 5 ile başlamalı' : '');
@@ -33,6 +38,85 @@ export default function Giris() {
   const s = styles(c);
   const [step, setStep] = useState<Step>('phone');
   const [phone, setPhone] = useState('');
+  const db = useSQLiteContext();
+  const { signIn, reloadFromDb } = useProfile();
+  const e164 = `+90${phone}`;
+
+  // SMS isteme sınırı (60 sn ara, günde 5; src/lib/smsLimit.ts). Saniyede bir yeniden hesaplanır.
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const limit = smsStatus(db, now);
+
+  // SMS gönder (ilk sefer ve "tekrar gönder"). Hata metni döner.
+  const send = async () => {
+    const st = smsStatus(db);
+    if (st.dayFull) return 'Bu telefondan bugün çok fazla kod istendi. Yarın tekrar dene.';
+    if (st.wait > 0) return `Yeni kod için ${st.wait} sn bekle.`;
+    try {
+      await sendCode(e164);
+      recordSms(db);
+      setNow(Date.now());
+      return '';
+    } catch (e) {
+      return authErrorText(e);
+    }
+  };
+
+  // Doğrulanan hesap: buluttan geri yükle; profili ve aracı olan şoför "Son bir adım"ı görmez.
+  // Doğrulama iki yoldan haber verir (kod onayı ve Firebase'in oturum dinleyicisi): ikisi de AYNI işi bekler,
+  // hata olursa kod ekranında görünür. Hata sonrası kod yeniden girilince yeni SMS istemeden tekrar denenir.
+  const finishing = useRef<Promise<string> | null>(null);
+  const finish = useCallback(
+    (user: AuthUser) => {
+      finishing.current ??= (async () => {
+        try {
+          const { complete } = await restoreAfterSignIn(db, user);
+          reloadFromDb();
+          if (complete) {
+            const st = loadSettings(db);
+            signIn({ name: st.name, il: st.il, phone });
+            router.replace('/');
+          } else setStep('profile');
+          return '';
+        } catch (e) {
+          if (__DEV__) console.warn('Giriş sonrası geri yükleme', e);
+          finishing.current = null;
+          return authErrorText(e);
+        }
+      })();
+      return finishing.current;
+    },
+    [db, phone, reloadFromDb, signIn],
+  );
+
+  const verify = async (code: string) => {
+    try {
+      return await finish(currentUser() ?? (await confirmCode(code, phone)));
+    } catch (e) {
+      return authErrorText(e);
+    }
+  };
+
+  // Firebase'de oturum açık ama uygulamada profil yok (geri yükleme yarıda kaldı): yeni SMS istemeden
+  // kod ekranından devam edilir; aşağıdaki dinleyici geri yüklemeyi hemen başlatır.
+  useEffect(() => {
+    const u = currentUser();
+    if (u) {
+      setPhone(u.phone.replace(/^\+90/, ''));
+      setStep('code');
+    }
+  }, []);
+
+  // Android kodu SMS'ten kendisi okuyup girişi tamamlayabilir: o zaman kod girilmeden devam edilir.
+  useEffect(() => {
+    if (step !== 'code') return;
+    return onUser((u) => {
+      if (u) finish(u);
+    });
+  }, [step, finish]);
 
   return (
     <SafeAreaView style={s.screen}>
@@ -44,8 +128,8 @@ export default function Giris() {
         automaticallyAdjustKeyboardInsets
         showsVerticalScrollIndicator={false}
       >
-        {step === 'phone' && <PhoneStep phone={phone} setPhone={setPhone} onNext={() => setStep('code')} />}
-        {step === 'code' && <CodeStep phone={phone} onBack={() => setStep('phone')} onNext={() => setStep('profile')} />}
+        {step === 'phone' && <PhoneStep phone={phone} setPhone={setPhone} send={send} wait={limit.wait} onSent={() => setStep('code')} />}
+        {step === 'code' && <CodeStep phone={phone} onBack={() => setStep('phone')} verify={verify} resend={send} wait={limit.wait} />}
         {step === 'profile' && <ProfileStep phone={phone} />}
         <View style={s.grow} />
         <View style={s.dots}>
@@ -58,12 +142,34 @@ export default function Giris() {
   );
 }
 
-function PhoneStep({ phone, setPhone, onNext }: { phone: string; setPhone: (v: string) => void; onNext: () => void }) {
+function PhoneStep({
+  phone,
+  setPhone,
+  send,
+  wait,
+  onSent,
+}: {
+  phone: string;
+  setPhone: (v: string) => void;
+  send: () => Promise<string>;
+  wait: number; // yeni kod için kalan saniye
+  onSent: () => void;
+}) {
   const { c } = useTheme();
   const s = styles(c);
   const err = phoneErr(phone);
   const ok = phone.length === 10 && !err;
   const [focused, setFocused] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendErr, setSendErr] = useState('');
+  const next = async () => {
+    setSending(true);
+    setSendErr('');
+    const e = await send();
+    setSending(false);
+    if (e) setSendErr(e);
+    else onSent();
+  };
   return (
     <>
       <View style={s.brand}>
@@ -81,7 +187,10 @@ function PhoneStep({ phone, setPhone, onNext }: { phone: string; setPhone: (v: s
         <Text style={s.cc}>+90</Text>
         <TextInput
           value={fmtPhone(phone)}
-          onChangeText={(v) => setPhone(v.replace(/\D/g, '').replace(/^0/, '').slice(0, 10))}
+          onChangeText={(v) => {
+            setSendErr('');
+            setPhone(v.replace(/\D/g, '').replace(/^0/, '').slice(0, 10));
+          }}
           keyboardType="phone-pad"
           textContentType="telephoneNumber"
           autoComplete="tel-national"
@@ -92,9 +201,17 @@ function PhoneStep({ phone, setPhone, onNext }: { phone: string; setPhone: (v: s
           accessibilityLabel="Telefon numarası"
         />
       </View>
-      <Text style={[s.hint, err ? { color: c.red } : null]}>{err || 'Giriş ya da kayıt için SMS ile kod göndereceğiz.'}</Text>
+      <Text style={[s.hint, err || sendErr ? { color: c.red } : null]}>
+        {err || sendErr || 'Giriş ya da kayıt için SMS ile kod göndereceğiz.'}
+      </Text>
       <View style={[s.row, { marginTop: 22 }]}>
-        <Button label="Devam et" icon="right" iconAfter onPress={onNext} disabled={!ok} />
+        <Button
+          label={sending ? 'Kod gönderiliyor…' : wait > 0 ? `Yeni kod için ${wait} sn` : 'Devam et'}
+          icon="right"
+          iconAfter
+          onPress={next}
+          disabled={!ok || sending || wait > 0}
+        />
       </View>
       <Text style={s.legal}>
         {/* Aydınlatma metni "kabul edilmez", okunur (KVKK md. 10 bilgilendirme yükümlülüğü). */}
@@ -112,29 +229,53 @@ function PhoneStep({ phone, setPhone, onNext }: { phone: string; setPhone: (v: s
   );
 }
 
-function CodeStep({ phone, onBack, onNext }: { phone: string; onBack: () => void; onNext: () => void }) {
+function CodeStep({
+  phone,
+  onBack,
+  verify,
+  resend,
+  wait,
+}: {
+  phone: string;
+  onBack: () => void;
+  verify: (code: string) => Promise<string>; // hata metni döner, boşsa doğrulandı
+  resend: () => Promise<string>;
+  wait: number; // "tekrar gönder" için kalan saniye (60 sn kuralı)
+}) {
   const { c } = useTheme();
   const s = styles(c);
   const [code, setCode] = useState('');
-  const [sentAt, setSentAt] = useState(Date.now());
-  const [now, setNow] = useState(Date.now());
   const [verified, setVerified] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [err, setErr] = useState('');
   const input = useRef<TextInput>(null);
 
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(id);
-  }, []);
-
+  // 6 hane girilince doğrula. Yanlışsa kutular temizlenir ve uyarı çıkar.
   useEffect(() => {
     if (code.length !== 6) return;
-    setVerified(true);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const id = setTimeout(onNext, 700);
-    return () => clearTimeout(id);
-  }, [code, onNext]);
+    let alive = true;
+    setChecking(true);
+    setErr('');
+    verify(code).then((e) => {
+      if (!alive) return;
+      setChecking(false);
+      if (e) {
+        setErr(e);
+        setCode('');
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        input.current?.focus();
+      } else {
+        setVerified(true);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    });
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code]);
 
-  const left = Math.max(0, RESEND_S - Math.floor((now - sentAt) / 1000));
+  const left = wait;
 
   return (
     <>
@@ -162,12 +303,15 @@ function CodeStep({ phone, onBack, onNext }: { phone: string; onBack: () => void
         <TextInput
           ref={input}
           value={code}
-          onChangeText={(v) => setCode(v.replace(/\D/g, '').slice(0, 6))}
+          onChangeText={(v) => {
+            setErr('');
+            setCode(v.replace(/\D/g, '').slice(0, 6));
+          }}
           keyboardType="number-pad"
           textContentType="oneTimeCode"
           autoComplete="sms-otp"
           autoFocus
-          editable={!verified}
+          editable={!verified && !checking}
           style={s.hidden}
           caretHidden
         />
@@ -181,9 +325,9 @@ function CodeStep({ phone, onBack, onNext }: { phone: string; onBack: () => void
         <View style={s.links}>
           <Pressable
             disabled={left > 0}
-            onPress={() => {
-              setSentAt(Date.now());
+            onPress={async () => {
               setCode('');
+              setErr(await resend());
             }}
           >
             <Text style={[s.link, left > 0 && { color: c.faint }]}>
@@ -195,7 +339,9 @@ function CodeStep({ phone, onBack, onNext }: { phone: string; onBack: () => void
           </Pressable>
         </View>
       )}
-      <Text style={s.legal}>Deneme sürümü: SMS gönderilmiyor, herhangi 6 rakam yazman yeterli.</Text>
+      {!!err && <Text style={[s.hint, { color: c.red, textAlign: 'center', marginTop: 14 }]}>{err}</Text>}
+      {checking && <Text style={[s.hint, { textAlign: 'center', marginTop: 14 }]}>Kontrol ediliyor…</Text>}
+      {!cloudEnabled && <Text style={s.legal}>Deneme sürümü: SMS gönderilmiyor, herhangi 6 rakam yazman yeterli.</Text>}
     </>
   );
 }

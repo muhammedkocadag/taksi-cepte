@@ -1,4 +1,5 @@
 import { openBrowserAsync } from 'expo-web-browser';
+import { useSQLiteContext } from 'expo-sqlite';
 import { useState, type ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,11 +10,13 @@ import { IlPicker } from '@/components/IlPicker';
 import { BackHeader } from '@/components/ScreenHeader';
 import { Sheet } from '@/components/Sheet';
 import { Button, Field, SheetHeader } from '@/components/ui';
+import { cloudEnabled } from '@/lib/auth';
 import { APP_NAME, LEGAL } from '@/lib/brand';
 import { cityEvents } from '@/lib/events';
 import { testNotification, useNotifPermission } from '@/lib/notifications';
 import { weeklyDigest } from '@/lib/notifyPlan';
 import { addDays, monday } from '@/lib/period';
+import { deleteCloudAccount, prepareSignOut } from '@/store/account';
 import { useProfile } from '@/store/profile';
 import { useTheme, type ThemeSetting } from '@/theme/ThemeProvider';
 import { fonts, solid, type Palette } from '@/theme/tokens';
@@ -33,7 +36,34 @@ export default function Ayarlar() {
   const { profile, settings, setSetting, signIn, signOut, deleteAccount } = useProfile();
   const [sheet, setSheet] = useState<'name' | 'il' | 'logout' | 'delete' | null>(null);
   const [name, setName] = useState('');
-  const close = () => setSheet(null);
+  const close = () => {
+    setSheet(null);
+    setAccErr('');
+    setForceOut(false);
+  };
+  // Çıkış ve silme internet ister (önce bulut): olmazsa pencere açık kalır, uyarı çıkar, telefondaki veri silinmez.
+  const db = useSQLiteContext();
+  const [busy, setBusy] = useState(false);
+  const [accErr, setAccErr] = useState('');
+  const [forceOut, setForceOut] = useState(false); // yedeksiz kayıtlar için ikinci basış: "Yine de çık"
+  const doAccount = async (kind: 'logout' | 'delete') => {
+    setBusy(true);
+    setAccErr('');
+    try {
+      if (kind === 'logout') await prepareSignOut(db, forceOut);
+      else await deleteCloudAccount();
+      setSheet(null);
+      if (kind === 'logout') signOut();
+      else deleteAccount();
+    } catch (e) {
+      if ((e as { code?: string })?.code === 'yedeksiz') {
+        setForceOut(true);
+        setAccErr('Bu kayıtlar bir hesaba yedeklenmemiş; çıkış yaparsan bu telefondan silinir.');
+      } else setAccErr('İnternet bağlantısı gerekli. Bağlanıp tekrar dene; kayıtların telefonda duruyor.');
+    } finally {
+      setBusy(false);
+    }
+  };
   const perm = useNotifPermission();
 
   const goalOn = settings.goalOn === '1';
@@ -189,15 +219,24 @@ export default function Ayarlar() {
       <IlPicker visible={sheet === 'il'} onClose={close} onPick={(il) => profile && signIn({ ...profile, il })} />
 
       <Sheet visible={sheet === 'logout'} onClose={close}>
-        <SheetHeader icon="logout" tone="yellow" title="Çıkış yapılsın mı?" subtitle="Kayıtların bu telefonda kalır; tekrar giriş yapınca yerinde olur." />
+        <SheetHeader
+          icon="logout"
+          tone="yellow"
+          title="Çıkış yapılsın mı?"
+          subtitle={
+            cloudEnabled
+              ? 'Kayıtların hesabına yedeklenir; aynı numarayla giriş yapınca, başka telefondan da geri gelir.'
+              : 'Kayıtların bu telefonda kalır; tekrar giriş yapınca yerinde olur.'
+          }
+        />
+        {!!accErr && <Text style={[s.warn, { color: c.red }]}>{accErr}</Text>}
         <View style={s.buttons}>
           <Button label="Vazgeç" variant="ghost" onPress={close} />
           <Button
-            label="Çıkış yap"
-            onPress={() => {
-              close();
-              signOut();
-            }}
+            label={busy ? 'Yedekleniyor…' : forceOut ? 'Yine de çık' : 'Çıkış yap'}
+            variant={forceOut ? 'red' : undefined}
+            onPress={() => doAccount('logout')}
+            disabled={busy}
             style={{ flex: 1.4 }}
           />
         </View>
@@ -208,15 +247,14 @@ export default function Ayarlar() {
         <Text style={[s.warn, { color: c.text }]}>
           Bütün vardiyaların, gelir-gider kayıtların ve araç bilgilerin <Text style={{ color: c.red, ...fonts.uiBold }}>kalıcı olarak</Text> silinir. Bu işlem geri alınamaz.
         </Text>
+        {!!accErr && <Text style={[s.warn, { color: c.red }]}>{accErr}</Text>}
         <View style={s.buttons}>
           <Button label="Vazgeç" variant="ghost" onPress={close} />
           <Button
             label="Evet, hesabımı sil"
             variant="red"
-            onPress={() => {
-              close();
-              deleteAccount();
-            }}
+            onPress={() => doAccount('delete')}
+            disabled={busy}
             style={{ flex: 1.6 }}
           />
         </View>

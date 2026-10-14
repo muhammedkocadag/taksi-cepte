@@ -18,6 +18,9 @@
     },
     "hosting": {
       "port": 5005
+    },
+    "functions": {
+      "port": 5001
     }
   },
   "hosting": {
@@ -72,5 +75,18 @@
         ]
       }
     ]
-  }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "runtime": "nodejs22",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "*.log",
+        "test"
+      ]
+    }
+  ]
 }
