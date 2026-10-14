@@ -1,10 +1,10 @@
 import anlik from './etkinlik-anlik.json';
 import { startOfDay } from './period';
 
-// Etkinlik verisi. Gece görevi (firebase/etkinlik/) gerçek Ankara etkinliklerini toplayıp Firestore `events`'e yazar.
-// Expo Go'da Firestore olmadığı için şimdilik o listenin anlık görüntüsü uygulamanın içinde:
-// `etkinlik-anlik.json` (yenilemek için firebase/ içinde `npm run etkinlik -- --uygulama`).
-// Development build gelince aynı biçimdeki belgeler Firestore'dan okunacak (fromDoc değişmez).
+// Etkinlik verisi. Gece görevi (firebase/etkinlik/, GitHub Actions) gerçek Ankara etkinliklerini toplayıp
+// Firestore `events`'e yazar; uygulama oradan okur (src/store/events.tsx, telefonda önbellek).
+// `etkinlik-anlik.json` yedektir: Expo Go'da (Firestore yok) ve buluttan hiç okunamamışsa gösterilir
+// (yenilemek için firebase/ içinde `npm run etkinlik -- --uygulama`).
 
 export type Demand = 'cokYuksek' | 'yuksek' | 'orta';
 
@@ -34,12 +34,12 @@ export function fromDoc(d: EventDoc): CityEvent {
 }
 
 // Bitmemiş etkinlikler (devam eden de görünür).
-export function cityEvents(now = Date.now()): CityEvent[] {
-  return (anlik.etkinlikler as EventDoc[]).filter((e) => e.end > now).map(fromDoc);
-}
+export const toCityEvents = (docs: EventDoc[], now = Date.now()): CityEvent[] =>
+  docs.filter((e) => e.end > now).map(fromDoc);
 
-// Listenin alındığı an (ekranda "… tarihli liste" notu için).
-export const EVENTS_FETCHED_AT: number = anlik.alindi;
+// Uygulamanın içindeki yedek liste ve alındığı an.
+export const SNAPSHOT: EventDoc[] = anlik.etkinlikler as EventDoc[];
+export const SNAPSHOT_AT: number = anlik.alindi;
 
 // Şimdilik sadece Ankara.
 export const SUPPORTED_CITIES = ['Ankara'];

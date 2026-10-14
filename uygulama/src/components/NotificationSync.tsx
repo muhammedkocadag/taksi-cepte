@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useMemo } from 'react';
 
-import { SUPPORTED_CITIES, cityEvents } from '@/lib/events';
+import { SUPPORTED_CITIES } from '@/lib/events';
 import { applyPlan, useNotificationTaps } from '@/lib/notifications';
 import { plan } from '@/lib/notifyPlan';
+import { useCityEvents } from '@/store/events';
 import { useProfile } from '@/store/profile';
 import { useShift } from '@/store/shift';
 import { useVehicle } from '@/store/vehicle';
@@ -13,6 +14,7 @@ export function NotificationSync() {
   const { current } = useShift();
   const { vehicle } = useVehicle();
   const { profile, settings } = useProfile();
+  const { events } = useCityEvents();
 
   const bells = settings.evBells ?? '[]';
   const items = useMemo(() => {
@@ -21,7 +23,7 @@ export function NotificationSync() {
     try {
       ids = JSON.parse(bells);
     } catch {}
-    const all = SUPPORTED_CITIES.includes(profile.il) ? cityEvents() : [];
+    const all = SUPPORTED_CITIES.includes(profile.il) ? events : [];
     return plan({
       now: Date.now(),
       shiftStart: current?.start ?? null,
@@ -33,7 +35,7 @@ export function NotificationSync() {
       notifMaint: settings.notifMaint !== '0',
       notifWeekly: settings.notifWeekly !== '0',
     });
-  }, [profile, current?.start, vehicle, bells, settings.notifShift, settings.notifMaint, settings.notifWeekly]);
+  }, [profile, current?.start, vehicle, bells, events, settings.notifShift, settings.notifMaint, settings.notifWeekly]);
 
   const open = useCallback((url: string) => {
     if (profile) router.push(url as never);

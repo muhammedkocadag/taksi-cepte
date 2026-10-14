@@ -12,11 +12,11 @@ import { Sheet } from '@/components/Sheet';
 import { Button, Field, SheetHeader } from '@/components/ui';
 import { cloudEnabled } from '@/lib/auth';
 import { APP_NAME, LEGAL } from '@/lib/brand';
-import { cityEvents } from '@/lib/events';
 import { testNotification, useNotifPermission } from '@/lib/notifications';
 import { weeklyDigest } from '@/lib/notifyPlan';
 import { addDays, monday } from '@/lib/period';
 import { deleteCloudAccount, prepareSignOut } from '@/store/account';
+import { useCityEvents } from '@/store/events';
 import { useProfile } from '@/store/profile';
 import { useTheme, type ThemeSetting } from '@/theme/ThemeProvider';
 import { fonts, solid, type Palette } from '@/theme/tokens';
@@ -68,10 +68,11 @@ export default function Ayarlar() {
 
   const goalOn = settings.goalOn === '1';
   const on = (key: string) => settings[key] !== '0'; // bildirimler varsayılan açık
+  const { events } = useCityEvents();
   const tryWeekly = () => {
     const now = Date.now();
     const il = profile?.il ?? '';
-    const d = weeklyDigest(cityEvents(now), monday(now), il) ?? weeklyDigest(cityEvents(now), addDays(monday(now), 7), il);
+    const d = weeklyDigest(events, monday(now), il) ?? weeklyDigest(events, addDays(monday(now), 7), il);
     if (d) testNotification({ ...d, url: '/etkinlik' });
   };
 

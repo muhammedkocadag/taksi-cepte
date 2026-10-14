@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { CloudSync } from '@/components/CloudSync';
 import { NotificationSync } from '@/components/NotificationSync';
 import { migrate } from '@/store/db';
+import { EventsProvider } from '@/store/events';
 import { ProfileProvider, useProfile } from '@/store/profile';
 import { ShiftProvider } from '@/store/shift';
 import { VehicleProvider } from '@/store/vehicle';
@@ -53,7 +54,9 @@ export default function RootLayout() {
           <ThemeProvider>
             <VehicleProvider>
               <ShiftProvider>
-                <Screens />
+                <EventsProvider>
+                  <Screens />
+                </EventsProvider>
               </ShiftProvider>
             </VehicleProvider>
           </ThemeProvider>

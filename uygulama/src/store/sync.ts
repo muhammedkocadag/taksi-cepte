@@ -27,7 +27,7 @@ const COLS: Record<Table, string[]> = {
 };
 
 // Sadece bu cihaza ait ayarlar buluta gitmez.
-const LOCAL_KEYS = new Set(['signedIn', 'phone', 'uid', 'smsLog', 'syncPushAt', 'syncPullAt']);
+const LOCAL_KEYS = new Set(['signedIn', 'phone', 'uid', 'smsLog', 'eventsCache', 'syncPushAt', 'syncPullAt']);
 const PROFILE_KEYS = new Set(['name', 'il']);
 
 // Başka cihazın saati biraz geride olabilir; çekerken geriye doğru pay bırakılır (tekrar uygulamak zararsız).

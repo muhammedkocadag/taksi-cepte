@@ -7,8 +7,9 @@ import { Backdrop } from '@/components/Backdrop';
 import { Icon } from '@/components/Icon';
 import { useTabBarSpace } from '@/components/TabBar';
 import { TopBlur, useScrollY } from '@/components/TopBlur';
-import { DEMAND_LABEL, EVENTS_FETCHED_AT, SUPPORTED_CITIES, cityEvents, type CityEvent, type Demand } from '@/lib/events';
+import { DEMAND_LABEL, SUPPORTED_CITIES, type CityEvent, type Demand } from '@/lib/events';
 import { MONTHS, addDays, dayDiff, monday, startOfDay } from '@/lib/period';
+import { useCityEvents } from '@/store/events';
 import { useProfile } from '@/store/profile';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts, solid, type Palette } from '@/theme/tokens';
@@ -52,7 +53,8 @@ export default function Etkinlik() {
     ay: new Date(n.getFullYear(), n.getMonth() + 1, 1).getTime(),
   }[tab];
   // Bitmemiş olanlar; dün başlayıp süren (gece yarısını geçen konser) "Bugün" sayılır.
-  const list = cityEvents(now)
+  const { events, fetchedAt, live } = useCityEvents();
+  const list = events
     .filter((e) => e.day < limit)
     .sort((a, b) => a.day - b.day || a.start.localeCompare(b.start));
   const supported = SUPPORTED_CITIES.includes(il);
@@ -105,7 +107,8 @@ export default function Etkinlik() {
               <Text style={s.footText}>Zil açıksa 1 gün önce ve etkinlik günü hatırlatılır.</Text>
             </View>
             <Text style={s.sample}>
-              Deneme sürümü: {new Date(EVENTS_FETCHED_AT).getDate()} {MONTHS[new Date(EVENTS_FETCHED_AT).getMonth()]} tarihli liste.
+              {live ? 'Güncellendi' : 'Deneme listesi'}: {new Date(fetchedAt).getDate()} {MONTHS[new Date(fetchedAt).getMonth()]}{' '}
+              {String(new Date(fetchedAt).getHours()).padStart(2, '0')}:{String(new Date(fetchedAt).getMinutes()).padStart(2, '0')}
             </Text>
           </>
         )}

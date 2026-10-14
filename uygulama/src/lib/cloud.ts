@@ -11,6 +11,7 @@ import {
 } from '@react-native-firebase/firestore';
 
 import type { DeviceInfo } from '@/lib/deviceInfo';
+import type { EventDoc } from '@/lib/events';
 import type { Cloud, CloudRow, ProfileDoc, Table } from '@/store/sync';
 
 // Eşitleme beyninin (src/store/sync.ts) Firebase'e bağlanan ince katmanı.
@@ -111,3 +112,13 @@ export async function deleteMyData(uid: string) {
 }
 
 const col = (db: ReturnType<typeof getFirestore>, uid: string, t: Table) => collection(db, 'users', uid, t);
+
+// Şehrin bitmemiş etkinlikleri (Firestore `events`, gece görevi yazar; kurallar: giriş yapan okur).
+// Tek alanlı filtre (end > şimdi) kendiliğinden dizinli; şehir uygulamada süzülür (birleşik dizin gerekmesin).
+export async function fetchEvents(city: string, now = Date.now()): Promise<EventDoc[]> {
+  const snap = await withTimeout(getDocsFromServer(query(collection(getFirestore(), 'events'), where('end', '>', now))));
+  return snap.docs
+    .map((d) => ({ ...(d.data() as Omit<EventDoc, 'id'> & { city?: string }), id: d.id }))
+    .filter((e) => e.city === city)
+    .map(({ id, cat, title, venue, start, end, demand }) => ({ id, cat, title, venue, start, end, demand }));
+}
