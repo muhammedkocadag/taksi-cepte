@@ -32,5 +32,8 @@ export function formatPlate(raw: string) {
   return [m[1], m[2], m[3]].filter(Boolean).join(' ');
 }
 
+// Plaka örneği, şoförün ilinin koduyla (ILLER plaka sırasında; il yoksa Ankara): "06 T 1234".
+export const plateExample = (il?: string) => `${String(ILLER.indexOf(il ?? '') + 1 || 6).padStart(2, '0')} T 1234`;
+
 // Plakada sadece Latin harfleri olur; il kodu 01–81.
 export const plateOk = (p: string) => /^(0[1-9]|[1-7]\d|8[01]) [A-Z]{1,3} \d{2,4}$/.test(p);

@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { openBrowserAsync } from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Backdrop } from '@/components/Backdrop';
@@ -13,7 +13,7 @@ import { Logo } from '@/components/Logo';
 import { Sheet } from '@/components/Sheet';
 import { Button, Field, PickBox } from '@/components/ui';
 import { APP_NAME, LEGAL, TAGLINE } from '@/lib/brand';
-import { formatPlate, plateOk } from '@/lib/data';
+import { formatPlate, plateExample as examplePlate, plateOk } from '@/lib/data';
 import { useProfile } from '@/store/profile';
 import { useVehicle } from '@/store/vehicle';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -37,18 +37,23 @@ export default function Giris() {
   return (
     <SafeAreaView style={s.screen}>
       <Backdrop />
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={s.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          {step === 'phone' && <PhoneStep phone={phone} setPhone={setPhone} onNext={() => setStep('code')} />}
-          {step === 'code' && <CodeStep phone={phone} onBack={() => setStep('phone')} onNext={() => setStep('profile')} />}
-          {step === 'profile' && <ProfileStep phone={phone} />}
-          <View style={s.dots}>
-            {(['phone', 'code', 'profile'] as Step[]).map((x) => (
-              <View key={x} style={[s.dot, x === step && s.dotOn]} />
-            ))}
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+      {/* Klavye: ekranı küçültmek yerine (KeyboardAvoidingView içerik zıplatıyordu) iOS kendi animasyonuyla kaydırır. */}
+      <ScrollView
+        contentContainerStyle={s.body}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+        showsVerticalScrollIndicator={false}
+      >
+        {step === 'phone' && <PhoneStep phone={phone} setPhone={setPhone} onNext={() => setStep('code')} />}
+        {step === 'code' && <CodeStep phone={phone} onBack={() => setStep('phone')} onNext={() => setStep('profile')} />}
+        {step === 'profile' && <ProfileStep phone={phone} />}
+        <View style={s.grow} />
+        <View style={s.dots}>
+          {(['phone', 'code', 'profile'] as Step[]).map((x) => (
+            <View key={x} style={[s.dot, x === step && s.dotOn]} />
+          ))}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -70,8 +75,7 @@ function PhoneStep({ phone, setPhone, onNext }: { phone: string; setPhone: (v: s
         <Text style={s.tagline}>{TAGLINE}</Text>
         <Text style={[s.sub, { textAlign: 'center', marginTop: 18 }]}>Devam etmek için telefon numaranı gir.</Text>
       </View>
-      <View style={s.grow} />
-      <Text style={s.label}>Telefon numarası</Text>
+      <Text style={[s.label, { marginTop: 32 }]}>Telefon numarası</Text>
       {/* Cam kutu; yazarken kenar sarı, hatada kırmızı. */}
       <View style={[s.phone, { borderColor: err ? c.red : focused ? c.yellow : c.cardBorder }]}>
         <Text style={s.cc}>+90</Text>
@@ -81,7 +85,6 @@ function PhoneStep({ phone, setPhone, onNext }: { phone: string; setPhone: (v: s
           keyboardType="phone-pad"
           textContentType="telephoneNumber"
           autoComplete="tel-national"
-          placeholder="5XX XXX XX XX"
           placeholderTextColor={c.faint}
           style={s.phoneInput}
           onFocus={() => setFocused(true)}
@@ -192,7 +195,6 @@ function CodeStep({ phone, onBack, onNext }: { phone: string; onBack: () => void
           </Pressable>
         </View>
       )}
-      <View style={s.grow} />
       <Text style={s.legal}>Deneme sürümü: SMS gönderilmiyor, herhangi 6 rakam yazman yeterli.</Text>
     </>
   );
@@ -214,12 +216,23 @@ function ProfileStep({ phone }: { phone: string }) {
   const [err, setErr] = useState('');
 
   const car = model ? `${year ? year + ' ' : ''}${model}` : '';
+  const plateExample = examplePlate(il);
+
+  // Bir alan bitince sıradakine geçilir: ad → il listesi → plaka → araç listesi → km.
+  // Pencere kapanma animasyonu bitmeden odaklanınca klavye açılmıyor; kısa bekleme.
+  const plateRef = useRef<TextInput>(null);
+  const odoRef = useRef<TextInput>(null);
+  const focusSoon = (r: React.RefObject<TextInput | null>) => setTimeout(() => r.current?.focus(), 450);
+  const openSheet = (k: 'il' | 'car') => {
+    Keyboard.dismiss();
+    setSheet(k);
+  };
 
   const finish = () => {
     const km = parseInt(odo, 10);
     if (!name.trim()) return setErr('Adını yaz.');
     if (!il) return setErr('Çalıştığın ili seç.');
-    if (!plateOk(plate)) return setErr('Plakayı "34 T 1234" biçiminde gir.');
+    if (!plateOk(plate)) return setErr(`Plakayı "${plateExample}" biçiminde gir.`);
     if (!model) return setErr('Aracını listeden seç.');
     if (!km) return setErr('Göstergedeki km\'yi gir.');
     save({
@@ -248,17 +261,34 @@ function ProfileStep({ phone }: { phone: string }) {
       <Text style={[s.h2, { marginTop: 8 }]}>Son bir adım</Text>
       <Text style={s.sub}>Seni ve aracını tanıyalım. Eksik kalan bilgileri sonra Araç ekranından tamamlayabilirsin.</Text>
       <View style={{ gap: 22, marginTop: 24 }}>
-        <Field label="Adın" value={name} onChange={clear(setName)} placeholder="Örn. Miraç" autoCapitalize="words" />
-        <PickBox label="Çalıştığın il" value={il} placeholder="İl seç" onPress={() => setSheet('il')} />
+        <Field
+          label="Adın"
+          value={name}
+          onChange={clear(setName)}
+          placeholder="Örn. Miraç"
+          autoCapitalize="words"
+          onSubmit={() => (il ? plateRef.current?.focus() : openSheet('il'))}
+        />
+        <PickBox label="Çalıştığın il" value={il} placeholder="İl seç" onPress={() => openSheet('il')} />
         <Field
           label="Plakan"
           value={plate}
           onChange={clear((v: string) => setPlate(formatPlate(v)))}
-          placeholder="34 T 1234"
+          placeholder={plateExample}
           autoCapitalize="characters"
+          inputRef={plateRef}
+          onSubmit={() => (model ? odoRef.current?.focus() : openSheet('car'))}
         />
-        <PickBox label="Aracın" value={car} placeholder="Marka, model ve yıl seç" onPress={() => setSheet('car')} />
-        <Field label="Göstergedeki km" value={odo} onChange={clear(setOdo)} digits={7} suffix="KM" placeholder="Örn. 148500" />
+        <PickBox label="Aracın" value={car} placeholder="Marka, model ve yıl seç" onPress={() => openSheet('car')} />
+        <Field
+          label="Göstergedeki km"
+          value={odo}
+          onChange={clear(setOdo)}
+          digits={7}
+          suffix="KM"
+          placeholder="Örn. 148500"
+          inputRef={odoRef}
+        />
       </View>
       {!!err && <Text style={[s.hint, { color: c.red, marginTop: 16 }]}>{err}</Text>}
       <View style={[s.row, { marginTop: 26 }]}>
@@ -271,6 +301,7 @@ function ProfileStep({ phone }: { phone: string }) {
         onPick={(v) => {
           setIl(v);
           setErr('');
+          if (!plate) focusSoon(plateRef);
         }}
       />
       <Sheet visible={sheet === 'car'} onClose={() => setSheet(null)}>
@@ -281,6 +312,7 @@ function ProfileStep({ phone }: { phone: string }) {
             setYear(y);
             setSheet(null);
             setErr('');
+            if (!odo) focusSoon(odoRef);
           }}
         />
       </Sheet>

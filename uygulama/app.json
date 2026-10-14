@@ -10,7 +10,12 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.kocadag.taksicepte",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleDevelopmentRegion": "tr",
+        "CFBundleLocalizations": [
+          "tr"
+        ],
+        "CFBundleAllowMixedLocalizations": true
       },
       "googleServicesFile": "./GoogleService-Info.plist"
     },
@@ -64,7 +69,14 @@
           "backgroundColor": "#0F0F32"
         }
       ],
-      "@react-native-firebase/app",
+      [
+        "@react-native-firebase/app",
+        {
+          "ios": {
+            "disableSPM": true
+          }
+        }
+      ],
       "@react-native-firebase/auth",
       [
         "expo-build-properties",

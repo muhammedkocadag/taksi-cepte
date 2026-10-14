@@ -343,8 +343,8 @@ function Breakdown(p: { c: Palette; title: string; cats: Category[]; A: Agg; tot
           key: cat,
           label: CATEGORY[cat].label,
           amount: p.A.byCategory[cat],
-          // Uygulama her temada gerçek taksi sarısı (açık temadaki hardal tonu çamur gibi duruyordu).
-          color: cat === 'Uygulama' ? c.yellow : CATEGORY[cat].tone(c).fg,
+          // Uygulama sarısı `yellowIcon` (açık temadaki yazı sarısı yellowInk hardal gibi duruyordu).
+          color: CATEGORY[cat].tone(c).fg,
         }))}
       />
     </View>

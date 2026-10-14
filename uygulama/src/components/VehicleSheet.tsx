@@ -5,7 +5,8 @@ import { CarPicker } from '@/components/CarPicker';
 import { Icon } from '@/components/Icon';
 import { Sheet } from '@/components/Sheet';
 import { Button, Choice, Field, PickBox, SheetHeader } from '@/components/ui';
-import { FUELS, formatPlate, plateOk } from '@/lib/data';
+import { FUELS, formatPlate, plateExample, plateOk } from '@/lib/data';
+import { useProfile } from '@/store/profile';
 import { useVehicle } from '@/store/vehicle';
 import { useTheme } from '@/theme/ThemeProvider';
 import { fonts } from '@/theme/tokens';
@@ -16,6 +17,8 @@ export function VehicleSheet({ visible, onClose }: { visible: boolean; onClose: 
   const { vehicle, save } = useVehicle();
   const [picking, setPicking] = useState(false);
   const [plate, setPlate] = useState('');
+  const { profile } = useProfile();
+  const example = plateExample(profile?.il);
   const [model, setModel] = useState('');
   const [year, setYear] = useState<number | null>(null);
   const [fuel, setFuel] = useState('');
@@ -35,7 +38,7 @@ export function VehicleSheet({ visible, onClose }: { visible: boolean; onClose: 
 
   const submit = () => {
     const km = parseInt(odo, 10);
-    if (!plateOk(plate)) return setErr('Plakayı "34 T 1234" biçiminde gir.');
+    if (!plateOk(plate)) return setErr(`Plakayı "${example}" biçiminde gir.`);
     if (!km) return setErr('Göstergedeki km boş bırakılamaz.');
     save({
       plate,
@@ -77,7 +80,7 @@ export function VehicleSheet({ visible, onClose }: { visible: boolean; onClose: 
           setPlate(formatPlate(v));
           setErr('');
         }}
-        placeholder="34 T 1234"
+        placeholder={example}
         autoCapitalize="characters"
       />
       <PickBox label="Araç" value={car} placeholder="Marka, model ve yıl seç" onPress={() => setPicking(true)} />

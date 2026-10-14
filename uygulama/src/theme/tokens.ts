@@ -13,6 +13,7 @@ export type Palette = {
   keyLine: string;
   yellow: string;
   yellowInk: string;
+  yellowIcon: string; // simge ve grafik sarısı (Uygulama kategorisi): yazı için yellowInk, bu daha canlı
   yellowSoft: string;
   green: string;
   greenSoft: string;
@@ -45,6 +46,7 @@ export const dark: Palette = {
   keyLine: '#3a3a3c',
   yellow: '#facc15',
   yellowInk: '#facc15',
+  yellowIcon: '#facc15',
   yellowSoft: 'rgba(250,204,21,0.16)',
   green: '#34d399',
   greenSoft: 'rgba(16,185,129,0.18)',
@@ -75,6 +77,7 @@ export const light: Palette = {
   keyLine: '#d9dfe7',
   yellow: '#facc15',
   yellowInk: '#a16207',
+  yellowIcon: '#eab308',
   yellowSoft: '#fef3c7',
   green: '#059669',
   greenSoft: '#d1fae5',

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useState, type ReactNode, type Ref } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Icon, type IconName } from '@/components/Icon';
@@ -77,6 +77,8 @@ export function Field({
   autoFocus,
   autoCapitalize,
   big,
+  inputRef,
+  onSubmit,
 }: {
   label?: string;
   value: string;
@@ -87,6 +89,8 @@ export function Field({
   autoFocus?: boolean;
   autoCapitalize?: 'characters' | 'words' | 'none';
   big?: boolean;
+  inputRef?: Ref<TextInput>;
+  onSubmit?: () => void; // verilirse klavyede "İleri" tuşu çıkar (sonraki alana geçiş)
 }) {
   const { c } = useTheme();
   const [focused, setFocused] = useState(!!autoFocus);
@@ -96,6 +100,12 @@ export function Field({
       {/* Cam kutu; yazarken kenar sarı. */}
       <View style={[styles.field, big && styles.fieldBig, fieldBox(c, focused)]}>
         <TextInput
+          ref={inputRef}
+          returnKeyType={onSubmit ? 'next' : 'done'}
+          // iOS sayı klavyesinin üstündeki düğme varsayılan İngilizce ("Done") çıkıyor.
+          inputAccessoryViewButtonLabel={onSubmit ? 'İleri' : 'Bitti'}
+          onSubmitEditing={onSubmit}
+          submitBehavior={onSubmit ? 'submit' : 'blurAndSubmit'}
           value={value}
           onChangeText={(v) => onChange(digits ? v.replace(/\D/g, '').slice(0, digits) : v)}
           keyboardType={digits ? 'number-pad' : 'default'}

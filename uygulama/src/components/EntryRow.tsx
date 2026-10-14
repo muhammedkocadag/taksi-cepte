@@ -30,6 +30,8 @@ export function EntryRow({
   const { c } = useTheme();
   const inc = isIncome(entry.category);
   const fg = inc ? c.green : c.red;
+  // Gelir simgesi ödeme türünün rengini alır (gelir dağılımıyla aynı: nakit yeşil, POS mavi, uygulama sarı); tutar yeşil kalır.
+  const iconColor = inc ? CATEGORY[entry.category].tone(c).fg : c.red;
   return (
     <Pressable
       onPress={onPress}
@@ -41,9 +43,9 @@ export function EntryRow({
       accessibilityRole="button"
       accessibilityHint="Düzenlemek için dokun"
     >
-      {/* Simge ödeme türünü gösterir (para / kart / telefon); renk sadece gelir-gider: yeşil / kırmızı. */}
+      {/* Simge ödeme türünü gösterir (para / kart / telefon). */}
       <View style={styles.icon}>
-        <Icon name={CATEGORY[entry.category].icon} size={24} color={fg} />
+        <Icon name={CATEGORY[entry.category].icon} size={24} color={iconColor} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={[styles.title, { color: c.text }]}>{entryTitle(shift, entry)}</Text>
