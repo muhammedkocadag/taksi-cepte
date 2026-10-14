@@ -147,10 +147,12 @@ Gerekli boyutlar: iPhone 6,9" (1320×2868 veya 1290×2796), Android telefon (en 
 | # | Ekran | Başlık (görselin üstünde) |
 |---|---|---|
 | 1 | Kayıt ekranı (tutar girilmiş, Nakit'e basılıyor) | Yolculuk bitti, tek dokunuşla kaydet |
-| 2 | Ana sayfa (dolu vardiya, hedef çubuğu) | Vardiyanın cirosu, gideri, net kârı |
+| 2 | Ana sayfa (dolu vardiya, hedef çubuğu) | Nakit, POS, Uygulama: tüm kazancın tek yerde |
 | 3 | Analiz (haftalık grafik + halka grafik) | Ne zaman, ne kadar kazandığını gör |
 | 4 | Araç ve bakım | Muayene, sigorta, bakım: hiçbirini unutma |
 | 5 | Etkinlikler | Maç, konser, fuar: çıkışta orada ol |
 | 6 | Koyu ve açık tema yan yana | Gece de gündüz de rahat |
 
 Görsellerdeki veriler gerçekçi ama uydurma olmalı (gerçek bir şoförün kayıtları değil). Arka plan uygulamanın lacivert-siyah degradesi, başlıklar beyaz, vurgu taksi sarısı.
+
+**Hazır (14.10.2026):** `magaza/gorseller/ios/` (1290×2796, 6 adet) ve `magaza/gorseller/android/` (1080×2160, 6 adet + `tanitim-1024x500.png` + `ikon-512.png`). Ham ekran görüntüleri `magaza/ekran-ham/` (iPhone 11, 725×1568; sohbete yüklenirken küçüldü, "Gerçek Boyut" ile e-postadan alınırsa daha keskin). Yeniden üretmek: `node magaza/araclar/gorsel.cjs <@resvg/resvg-js kurulu node_modules>` (başlıklar betiğin içinde). Örnek veri: geliştirme sürümünde Ayarlar → "örnek verileri yükle" (`src/lib/demoData.ts`; son 4 hafta, hafif yükseliş, açık vardiya, 06 TC 4821 Fiat Egea). Analiz görseli 21–27 Eylül haftası. Durum çubuğu betikte temizlenir: saat "9:41", pil dolu (zemin rengiyle kapatıp yeniden çizer; ölçüler iPhone 11 görüntüsüne göre; resvg yanında pngjs de kurulu olmalı).

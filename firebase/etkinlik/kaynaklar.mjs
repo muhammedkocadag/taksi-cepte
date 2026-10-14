@@ -128,6 +128,12 @@ export async function tff({ ileriHafta = 3, ikinciLigMac = 2 } = {}) {
   return out;
 }
 
+// TheSportsDB takım adlarındaki İngilizce ekleri atar: "Galatasaray Volleyball" → "Galatasaray", "Ankara DSI" → "Ankara DSİ".
+export const sporAdi = (s) =>
+  temizle(s)
+    .replace(/\s+(Volleyball|Basketball|Women|W)$/i, '')
+    .replace(/\bDSI\b/, 'DSİ');
+
 // ---------- TheSportsDB (basketbol, voleybol; ücretsiz anahtar takım başına sadece sıradaki maçı verir) ----------
 export async function tsdb() {
   const out = [];
@@ -138,7 +144,7 @@ export async function tsdb() {
       out.push({
         kaynak: 'tsdb',
         tur: t.tur,
-        baslik: `${e.strHomeTeam} - ${e.strAwayTeam}`,
+        baslik: `${sporAdi(e.strHomeTeam)} - ${sporAdi(e.strAwayTeam)}`,
         mekanAdi: e.strVenue,
         mekan: e.strVenue ? undefined : t.mekan,
         baslangic: Date.parse(e.strTimestamp.endsWith('Z') ? e.strTimestamp : `${e.strTimestamp}Z`), // UTC

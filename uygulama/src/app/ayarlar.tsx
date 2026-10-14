@@ -11,6 +11,7 @@ import { BackHeader } from '@/components/ScreenHeader';
 import { Sheet } from '@/components/Sheet';
 import { Button, Field, SheetHeader } from '@/components/ui';
 import { cloudEnabled } from '@/lib/auth';
+import { seedDemo } from '@/lib/demoData';
 import { APP_NAME, LEGAL } from '@/lib/brand';
 import { testNotification, useNotifPermission } from '@/lib/notifications';
 import { weeklyDigest } from '@/lib/notifyPlan';
@@ -33,7 +34,7 @@ const maskPhone = (d: string) => (d.length === 10 ? `+90 ${d.slice(0, 3)} ••
 export default function Ayarlar() {
   const { c, setting, setSetting: setTheme } = useTheme();
   const s = styles(c);
-  const { profile, settings, setSetting, signIn, signOut, deleteAccount } = useProfile();
+  const { profile, settings, setSetting, signIn, signOut, deleteAccount, reloadFromDb } = useProfile();
   const [sheet, setSheet] = useState<'name' | 'il' | 'logout' | 'delete' | null>(null);
   const [name, setName] = useState('');
   const close = () => {
@@ -147,6 +148,17 @@ export default function Ayarlar() {
           {__DEV__ && (
             <Pressable onPress={tryWeekly} accessibilityRole="button">
               <Text style={s.hint}>Geliştirme: haftalık özeti şimdi dene (5 sn sonra gelir)</Text>
+            </Pressable>
+          )}
+          {__DEV__ && (
+            <Pressable
+              onPress={() => {
+                seedDemo(db);
+                reloadFromDb();
+              }}
+              accessibilityRole="button"
+            >
+              <Text style={s.hint}>Geliştirme: örnek verileri yükle (mağaza görüntüleri; kayıtların yerine geçer)</Text>
             </Pressable>
           )}
           {perm.state === 'denied' && (
