@@ -185,6 +185,15 @@ describe('hesap kaydı ve yönetim paneli', () => {
     await assertFails(setDoc(doc(db, 'users/ali'), { name: 'X', il: 'Ankara', settings: {}, updated_at: now }));
   });
 
+  it('Apple ile giren şoför telefonsuz, kendi e-postasıyla kayıt yazar; başkasının e-postasını yazamaz', async () => {
+    const apple = env.authenticatedContext('elif', { email: 'x1y2@privaterelay.appleid.com', firebase: { sign_in_provider: 'apple.com' } }).firestore();
+    const kayit = (o = {}) => ({ email: 'x1y2@privaterelay.appleid.com', provider: 'apple', platform: 'ios', os: '18.2', model: 'iPhone 15', app: '1.0.0', created_at: now, last_seen: now, ...o });
+    await assertSucceeds(setDoc(doc(apple, 'accounts/elif'), kayit()));
+    await assertFails(setDoc(doc(apple, 'accounts/elif'), kayit({ email: 'baskasi@gmail.com' })));
+    await assertFails(setDoc(doc(apple, 'accounts/elif'), kayit({ phone: '+905321234567' }))); // token'da numara yok
+    await assertFails(setDoc(doc(apple, 'accounts/elif'), kayit({ provider: 'facebook' })));
+  });
+
   it('başka Google hesabı, doğrulanmamış e-posta ve şoförler paneli okuyamaz', async () => {
     const baska = env.authenticatedContext('x', { email: 'baska@gmail.com', email_verified: true }).firestore();
     const dogrulanmamis = env.authenticatedContext('y', { email: ADMIN, email_verified: false }).firestore();

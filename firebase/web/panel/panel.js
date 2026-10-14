@@ -118,7 +118,8 @@ function row(p) {
     tr.append(td);
   };
   add(null, p.profile?.name || '(adsız)', null, 'name');
-  add('Telefon', a ? fmtPhone(a.phone) : '–', null, 'nowrap');
+  // Telefonla girenlerde numara, Apple ile girenlerde e-posta (gizli e-posta da olabilir: ...@privaterelay.appleid.com).
+  add('Telefon / e-posta', a?.phone ? fmtPhone(a.phone) : a?.email || '–', a?.provider === 'apple' ? 'Apple ile giriş' : '', 'nowrap');
   add('İl', p.profile?.il || '–');
   add('Araç', carText(p.car) || '–', p.car?.fuel || '');
   const dev = el('span');
@@ -151,7 +152,7 @@ function render() {
   const q = $('q').value.trim().toLocaleLowerCase('tr');
   const list = q
     ? people.filter((p) =>
-        [p.profile?.name, p.profile?.il, p.account?.phone, fmtPhone(p.account?.phone), carText(p.car), deviceText(p.account)]
+        [p.profile?.name, p.profile?.il, p.account?.phone, fmtPhone(p.account?.phone), p.account?.email, carText(p.car), deviceText(p.account)]
           .join(' ')
           .toLocaleLowerCase('tr')
           .includes(q),

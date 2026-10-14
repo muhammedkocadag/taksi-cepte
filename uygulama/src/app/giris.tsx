@@ -1,4 +1,5 @@
 import * as Haptics from 'expo-haptics';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { router } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { openBrowserAsync } from 'expo-web-browser';
@@ -13,12 +14,24 @@ import { IlPicker } from '@/components/IlPicker';
 import { Logo } from '@/components/Logo';
 import { Sheet } from '@/components/Sheet';
 import { Button, Field, PickBox } from '@/components/ui';
-import { authErrorText, cloudEnabled, confirmCode, currentUser, onUser, sendCode, type AuthUser } from '@/lib/auth';
+import {
+  PHONE_LOGIN,
+  appleAvailable,
+  authErrorText,
+  cloudEnabled,
+  confirmCode,
+  currentUser,
+  isCanceled,
+  onUser,
+  sendCode,
+  signInWithApple,
+  type AuthUser,
+} from '@/lib/auth';
 import { APP_NAME, LEGAL, TAGLINE } from '@/lib/brand';
 import { recordSms, smsStatus } from '@/lib/smsLimit';
 import { formatPlate, plateExample as examplePlate, plateOk } from '@/lib/data';
 import { restoreAfterSignIn } from '@/store/account';
-import { loadSettings } from '@/store/db';
+import { loadSettings, saveSettings } from '@/store/db';
 import { useProfile } from '@/store/profile';
 import { useVehicle } from '@/store/vehicle';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -100,15 +113,32 @@ export default function Giris() {
     }
   };
 
-  // Firebase'de oturum açık ama uygulamada profil yok (geri yükleme yarıda kaldı): yeni SMS istemeden
-  // kod ekranından devam edilir; aşağıdaki dinleyici geri yüklemeyi hemen başlatır.
+  // Firebase'de oturum açık ama uygulamada profil yok (geri yükleme yarıda kaldı): telefonla girdiyse yeni SMS
+  // istemeden kod ekranından (dinleyici geri yüklemeyi başlatır), Apple ile girdiyse doğrudan geri yükleme.
   useEffect(() => {
     const u = currentUser();
-    if (u) {
+    if (!u) return;
+    if (u.provider === 'phone') {
       setPhone(u.phone.replace(/^\+90/, ''));
       setStep('code');
-    }
+    } else finish(u);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Apple ile giriş (iPhone, gerçek derleme). Apple adı sadece ilk girişte verir: "Son bir adım"da hazır gelsin.
+  const [appleOk, setAppleOk] = useState(false);
+  useEffect(() => {
+    appleAvailable().then(setAppleOk).catch(() => {});
+  }, []);
+  const apple = async () => {
+    try {
+      const { user, name } = await signInWithApple();
+      if (name && !loadSettings(db).name) saveSettings(db, { name });
+      return await finish(user);
+    } catch (e) {
+      return isCanceled(e) ? '' : authErrorText(e);
+    }
+  };
 
   // Android kodu SMS'ten kendisi okuyup girişi tamamlayabilir: o zaman kod girilmeden devam edilir.
   useEffect(() => {
@@ -128,7 +158,9 @@ export default function Giris() {
         automaticallyAdjustKeyboardInsets
         showsVerticalScrollIndicator={false}
       >
-        {step === 'phone' && <PhoneStep phone={phone} setPhone={setPhone} send={send} wait={limit.wait} onSent={() => setStep('code')} />}
+        {step === 'phone' && (
+          <PhoneStep phone={phone} setPhone={setPhone} send={send} wait={limit.wait} onSent={() => setStep('code')} apple={appleOk ? apple : null} />
+        )}
         {step === 'code' && <CodeStep phone={phone} onBack={() => setStep('phone')} verify={verify} resend={send} wait={limit.wait} />}
         {step === 'profile' && <ProfileStep phone={phone} />}
         <View style={s.grow} />
@@ -148,14 +180,19 @@ function PhoneStep({
   send,
   wait,
   onSent,
+  apple,
 }: {
   phone: string;
   setPhone: (v: string) => void;
   send: () => Promise<string>;
   wait: number; // yeni kod için kalan saniye
   onSent: () => void;
+  apple: (() => Promise<string>) | null; // Apple ile giriş (null: bu cihazda yok)
 }) {
-  const { c } = useTheme();
+  const { c, isDark } = useTheme();
+  const [appleBusy, setAppleBusy] = useState(false);
+  const [appleErr, setAppleErr] = useState('');
+  const showPhone = PHONE_LOGIN || !apple;
   const s = styles(c);
   const err = phoneErr(phone);
   const ok = phone.length === 10 && !err;
@@ -179,40 +216,65 @@ function PhoneStep({
           <Text style={{ color: c.yellowInk }}>{APP_NAME[0]}</Text> {APP_NAME[1]}
         </Text>
         <Text style={s.tagline}>{TAGLINE}</Text>
-        <Text style={[s.sub, { textAlign: 'center', marginTop: 18 }]}>Devam etmek için telefon numaranı gir.</Text>
+        <Text style={[s.sub, { textAlign: 'center', marginTop: 18 }]}>
+          {apple ? 'Devam etmek için Apple hesabınla giriş yap.' : 'Devam etmek için telefon numaranı gir.'}
+        </Text>
       </View>
-      <Text style={[s.label, { marginTop: 32 }]}>Telefon numarası</Text>
-      {/* Cam kutu; yazarken kenar sarı, hatada kırmızı. */}
-      <View style={[s.phone, { borderColor: err ? c.red : focused ? c.yellow : c.cardBorder }]}>
-        <Text style={s.cc}>+90</Text>
-        <TextInput
-          value={fmtPhone(phone)}
-          onChangeText={(v) => {
-            setSendErr('');
-            setPhone(v.replace(/\D/g, '').replace(/^0/, '').slice(0, 10));
-          }}
-          keyboardType="phone-pad"
-          textContentType="telephoneNumber"
-          autoComplete="tel-national"
-          placeholderTextColor={c.faint}
-          style={s.phoneInput}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          accessibilityLabel="Telefon numarası"
-        />
-      </View>
-      <Text style={[s.hint, err || sendErr ? { color: c.red } : null]}>
-        {err || sendErr || 'Giriş ya da kayıt için SMS ile kod göndereceğiz.'}
-      </Text>
-      <View style={[s.row, { marginTop: 22 }]}>
-        <Button
-          label={sending ? 'Kod gönderiliyor…' : wait > 0 ? `Yeni kod için ${wait} sn` : 'Devam et'}
-          icon="right"
-          iconAfter
-          onPress={next}
-          disabled={!ok || sending || wait > 0}
-        />
-      </View>
+      {apple && (
+        <View style={{ marginTop: 32 }}>
+          {/* Apple'ın kendi düğmesi (kurallar gereği): koyu temada beyaz, açıkta siyah; yazı iPhone dilinde. */}
+          <AppleAuthentication.AppleAuthenticationButton
+            buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
+            buttonStyle={isDark ? AppleAuthentication.AppleAuthenticationButtonStyle.WHITE : AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+            cornerRadius={16}
+            style={{ height: 56, opacity: appleBusy ? 0.5 : 1 }}
+            onPress={async () => {
+              if (appleBusy) return;
+              setAppleBusy(true);
+              setAppleErr(await apple());
+              setAppleBusy(false);
+            }}
+          />
+          {!!appleErr && <Text style={[s.hint, { color: c.red }]}>{appleErr}</Text>}
+          {showPhone && <Text style={[s.hint, { textAlign: 'center', marginTop: 22 }]}>ya da telefonla (geliştirme: test numaraları)</Text>}
+        </View>
+      )}
+      {showPhone && (
+        <>
+          <Text style={[s.label, { marginTop: apple ? 14 : 32 }]}>Telefon numarası</Text>
+          {/* Cam kutu; yazarken kenar sarı, hatada kırmızı. */}
+          <View style={[s.phone, { borderColor: err ? c.red : focused ? c.yellow : c.cardBorder }]}>
+            <Text style={s.cc}>+90</Text>
+            <TextInput
+              value={fmtPhone(phone)}
+              onChangeText={(v) => {
+                setSendErr('');
+                setPhone(v.replace(/\D/g, '').replace(/^0/, '').slice(0, 10));
+              }}
+              keyboardType="phone-pad"
+              textContentType="telephoneNumber"
+              autoComplete="tel-national"
+              placeholderTextColor={c.faint}
+              style={s.phoneInput}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              accessibilityLabel="Telefon numarası"
+            />
+          </View>
+          <Text style={[s.hint, err || sendErr ? { color: c.red } : null]}>
+            {err || sendErr || 'Giriş ya da kayıt için SMS ile kod göndereceğiz.'}
+          </Text>
+          <View style={[s.row, { marginTop: 22 }]}>
+            <Button
+              label={sending ? 'Kod gönderiliyor…' : wait > 0 ? `Yeni kod için ${wait} sn` : 'Devam et'}
+              icon="right"
+              iconAfter
+              onPress={next}
+              disabled={!ok || sending || wait > 0}
+            />
+          </View>
+        </>
+      )}
       <Text style={s.legal}>
         {/* Aydınlatma metni "kabul edilmez", okunur (KVKK md. 10 bilgilendirme yükümlülüğü). */}
         Devam ederek{' '}

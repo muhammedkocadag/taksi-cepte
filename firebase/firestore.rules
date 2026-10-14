@@ -8,7 +8,7 @@ rules_version = '2';
 //   users/{uid}/entries/{id}       gelir-gider kayıtları
 //   users/{uid}/vehicle/me         araç (tek belge)
 //   events/{id}                    etkinlikler (herkes okur, sadece sunucu görevi yazar)
-//   accounts/{uid}                 hesap kaydı: doğrulanmış telefon, cihaz, kayıt ve son giriş (yönetim paneli için)
+//   accounts/{uid}                 hesap kaydı: doğrulanmış telefon ya da Apple e-postası, cihaz, kayıt ve son giriş (panel)
 // Yönetici (panel, firebase/panel/): profil, araç ve hesap kaydını OKUR; vardiya ve gelir-gider kayıtlarını OKUYAMAZ.
 // Silme "yumuşak": deleted = true (eşitleme için). Gerçek silme sadece hesap silinirken.
 // Test: firebase/test (yerel emülatörde).
@@ -99,10 +99,13 @@ service cloud.firestore {
     }
 
     // Telefon numarası SMS ile doğrulanmış numaranın aynısı olmalı (uydurma numara yazılamaz).
+    // Telefon (SMS girişi) ve e-posta (Apple ile giriş) isteğe bağlı; varsa kimlik belgesindekiyle aynı olmalı.
     function validAccount(d) {
-      return d.keys().hasOnly(['phone', 'platform', 'os', 'model', 'app', 'created_at', 'last_seen'])
-        && d.keys().hasAll(['phone', 'platform', 'created_at', 'last_seen'])
-        && d.phone == request.auth.token.phone_number
+      return d.keys().hasOnly(['phone', 'email', 'provider', 'platform', 'os', 'model', 'app', 'created_at', 'last_seen'])
+        && d.keys().hasAll(['platform', 'created_at', 'last_seen'])
+        && (d.get('phone', '') == '' || d.phone == request.auth.token.phone_number)
+        && (d.get('email', '') == '' || d.email == request.auth.token.email)
+        && d.get('provider', 'phone') in ['apple', 'phone', 'other']
         && d.platform in ['ios', 'android']
         && shortString(d.get('os', ''), 20)
         && shortString(d.get('model', ''), 60)

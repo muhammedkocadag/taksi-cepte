@@ -10,7 +10,7 @@ import { IlPicker } from '@/components/IlPicker';
 import { BackHeader } from '@/components/ScreenHeader';
 import { Sheet } from '@/components/Sheet';
 import { Button, Field, SheetHeader } from '@/components/ui';
-import { cloudEnabled } from '@/lib/auth';
+import { cloudEnabled, currentUser, isCanceled } from '@/lib/auth';
 import { seedDemo } from '@/lib/demoData';
 import { APP_NAME, LEGAL } from '@/lib/brand';
 import { testNotification, useNotifPermission } from '@/lib/notifications';
@@ -57,6 +57,7 @@ export default function Ayarlar() {
       if (kind === 'logout') signOut();
       else deleteAccount();
     } catch (e) {
+      if (isCanceled(e)) return; // Apple doğrulamasından vazgeçti: hiçbir şey silinmedi
       if ((e as { code?: string })?.code === 'yedeksiz') {
         setForceOut(true);
         setAccErr('Bu kayıtlar bir hesaba yedeklenmemiş; çıkış yaparsan bu telefondan silinir.');
@@ -177,7 +178,7 @@ export default function Ayarlar() {
             tone={c.grey}
             bg={c.greySoft}
             title={profile?.name || 'Adın'}
-            sub={maskPhone(profile?.phone ?? '')}
+            sub={currentUser()?.provider === 'apple' ? 'Apple ile giriş' : maskPhone(profile?.phone ?? '')}
             onPress={() => {
               setName(profile?.name ?? '');
               setSheet('name');

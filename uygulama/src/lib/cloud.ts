@@ -80,16 +80,17 @@ export function firebaseCloud(uid: string): Cloud {
 }
 
 // Yönetim paneli için hesap kaydı (`accounts/{uid}`): ilk girişte oluşturulur, sonra açılışlarda en çok
-// 6 saatte bir son giriş ve cihaz bilgisi güncellenir. `phone` Firebase Auth'taki doğrulanmış numara (+90…);
-// kurallar başka numarayı reddeder.
+// 6 saatte bir son giriş ve cihaz bilgisi güncellenir. Telefon (SMS girişi) ya da e-posta (Apple ile giriş)
+// Firebase Auth'taki doğrulanmış değerdir; kurallar başka değeri reddeder.
 const SEEN_EVERY_MS = 6 * 3_600_000;
 
-export async function touchAccount(uid: string, phone: string, info: DeviceInfo, now = Date.now()) {
-  const ref = doc(getFirestore(), 'accounts', uid);
+export async function touchAccount(user: { uid: string; phone: string; email: string; provider: string }, info: DeviceInfo, now = Date.now()) {
+  const ref = doc(getFirestore(), 'accounts', user.uid);
   const snap = await withTimeout(getDocFromServer(ref));
   const old = snap.exists() ? (snap.data() as { created_at: number; last_seen: number } & DeviceInfo) : null;
   if (old && now - old.last_seen < SEEN_EVERY_MS && old.app === info.app && old.os === info.os) return;
-  await withTimeout(setDoc(ref, { phone, ...info, created_at: old?.created_at ?? now, last_seen: now }));
+  const id = { phone: user.phone, email: user.email, provider: user.provider };
+  await withTimeout(setDoc(ref, { ...id, ...info, created_at: old?.created_at ?? now, last_seen: now }));
 }
 
 // Hesap silme, sunucu fonksiyonu yokken (fatura hesabı kapalı: Cloud Functions çalışmaz) uygulamanın kendisinden:

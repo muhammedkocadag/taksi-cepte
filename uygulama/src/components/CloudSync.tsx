@@ -55,7 +55,7 @@ function Syncer() {
     if (!signedIn) return;
     const touch = () => {
       const u = currentUser();
-      if (u) require('@/lib/cloud').touchAccount(u.uid, u.phone, deviceInfo()).catch(() => {});
+      if (u) require('@/lib/cloud').touchAccount(u, deviceInfo()).catch(() => {});
     };
     run();
     touch();

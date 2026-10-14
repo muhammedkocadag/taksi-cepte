@@ -50,7 +50,7 @@ SENİN İÇİN TASARLANDI
 • Gece gündüz rahat okunan açık ve koyu tema
 • Büyük rakamlar, sade ekranlar
 • İnternet olmasa da çalışır
-• Telefon numaranla, şifresiz giriş
+• Apple hesabınla tek dokunuşla, şifresiz giriş
 • Kayıtların hesabına bağlı; telefonunu değiştirsen de kaybolmaz
 
 Taksi Cepte ücretsizdir. Sorun ya da önerin için: [destek e-postası]
@@ -80,7 +80,8 @@ Uygulamanın topladığı veriler (Aşama 2 sonrası, Firebase ile):
 
 | Veri | Ne için | Kişiyle ilişkili mi | Takip (reklam) |
 |---|---|---|---|
-| Telefon numarası | Giriş | Evet | Hayır |
+| E-posta adresi (Apple ile girişte Apple paylaşır; gizli yönlendirme olabilir) | Giriş, hesap yönetimi | Evet | Hayır |
+| Telefon numarası (sadece telefonla girişte; şu an mağaza sürümünde kapalı) | Giriş | Evet | Hayır |
 | Ad | Uygulama içinde gösterim | Evet | Hayır |
 | Gelir-gider kayıtları, vardiyalar (finansal bilgi) | Uygulamanın işlevi, buluta yedekleme | Evet | Hayır |
 | Araç bilgileri (plaka, km, bakım tarihleri) | Uygulamanın işlevi | Evet | Hayır |

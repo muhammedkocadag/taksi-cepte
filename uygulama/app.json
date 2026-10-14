@@ -17,7 +17,8 @@
         ],
         "CFBundleAllowMixedLocalizations": true
       },
-      "googleServicesFile": "./GoogleService-Info.plist"
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {

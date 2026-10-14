@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { cloudEnabled, currentUser, deleteUser, idToken, signOutUser, type AuthUser } from '@/lib/auth';
+import { cloudEnabled, currentUser, deleteUser, idToken, reauthAndRevokeApple, signOutUser, type AuthUser } from '@/lib/auth';
 
 import { loadSettings, loadVehicle, saveSettings, wipeAll } from './db';
 import { syncOnce } from './sync';
@@ -49,14 +49,18 @@ const hasRecords = (db: SQLiteDatabase) =>
 // kendisi siler (cloud.ts → deleteMyData) ve hesabı silmeyi dener.
 const DELETE_URL = 'https://europe-west3-taksi-cepte-9c4ac.cloudfunctions.net/hesabiSil';
 
+// Apple ile girenlerde önce Apple ile yeniden doğrulama (Face ID): Firebase hesabı silmek için yakın zamanda giriş
+// ister, Apple da bağlantının iptalini zorunlu tutar. Şoför vazgeçerse hata fırlar ve hiçbir şey silinmez.
 export async function deleteCloudAccount() {
-  if (!cloudEnabled) return;
+  if (!cloudEnabled || !cloud) return;
+  const u = currentUser();
+  if (!u) return; // giriş yok: bulutta silinecek bir şey yok
+  if (u.provider === 'apple') await reauthAndRevokeApple();
   const token = await idToken();
-  if (!token) return; // giriş yok: bulutta silinecek bir şey yok
-  const r = await fetch(DELETE_URL, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-  if (r.status === 404 && cloud) {
-    const u = currentUser();
-    if (u) await cloud.deleteMyData(u.uid);
+  const r = await fetch(DELETE_URL, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => null);
+  if (!r || r.status === 404) {
+    // Fonksiyon yayında değil ya da ulaşılamadı: uygulama kendisi siler (internet yoksa burada hata fırlar).
+    await cloud.deleteMyData(u.uid);
     await deleteUser().catch(() => {});
   } else if (!r.ok) throw new Error(`hesap silinemedi (${r.status})`);
   await signOutUser().catch(() => {});
