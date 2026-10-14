@@ -50,7 +50,12 @@
       "expo-font",
       "expo-sqlite",
       "@react-native-community/datetimepicker",
-      "expo-notifications",
+      [
+        "expo-notifications",
+        {
+          "enableBackgroundRemoteNotifications": true
+        }
+      ],
       [
         "expo-audio",
         {
