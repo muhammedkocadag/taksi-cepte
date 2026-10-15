@@ -53,7 +53,7 @@ SENİN İÇİN TASARLANDI
 • Apple hesabınla tek dokunuşla, şifresiz giriş
 • Kayıtların hesabına bağlı; telefonunu değiştirsen de kaybolmaz
 
-Taksi Cepte ücretsizdir. Sorun ya da önerin için: [destek e-postası]
+Taksi Cepte ücretsizdir. Sorun ya da önerin için: muhammedkocadag2003@gmail.com
 
 ### Bu sürümde yenilikler (ilk sürüm)
 Taksi Cepte'nin ilk sürümü. Kazancını tek dokunuşla kaydet, vardiyanı takip et, aracının bakımını unutma.
